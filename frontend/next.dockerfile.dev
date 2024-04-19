@@ -1,0 +1,24 @@
+# ベースとなるNode.jsのイメージ
+FROM node:18-alpine AS base
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# 依存関係をインストール
+FROM base AS deps
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
+
+# 開発用ビルド
+FROM base AS development
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ENV NODE_ENV=development
+EXPOSE 3000
+ENV CHOKIDAR_USEPOLLING=true
+RUN yarn global add pnpm
+CMD ["pnpm", "run", "dev"]
