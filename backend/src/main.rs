@@ -15,7 +15,7 @@ extern crate serde_derive;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct User {
-    id: Option<i32>,
+    id: Option<Uuid>,
     name: String,
     email: String,
 }
@@ -66,23 +66,27 @@ fn set_database() -> Result<(), PostgresError> {
     client.batch_execute(
         "
         CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR NOT NULL,
-            email VARCHAR NOT NULL
+            id UUID PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL
         )
     ",
     )?;
     Ok(())
 }
 
-fn get_id(request: &str) -> &str {
-    request
+fn get_id(request: &str) -> Result<Uuid, String> {
+    info!("request: {}", request);
+    let maybe_id = request
         .split("/")
         .nth(4)
         .unwrap_or_default()
         .split_whitespace()
         .next()
-        .unwrap_or_default()
+        .unwrap_or_default();
+
+    Uuid::parse_str(maybe_id)
+        .map_err(|_| "Failed to parse UUID from request".to_string())
 }
 
 fn get_user_request_body(request: &str) -> Result<User, serde_json::Error> {
@@ -156,7 +160,7 @@ fn handle_post_request(request: &str) -> (String, String) {
 //handle get request
 fn handle_get_request(request: &str) -> (String, String) {
     info!("request: {:?}", &request);
-    match (get_id(&request).parse::<i32>(), Client::connect(DB_URL.as_str(), NoTls)) {
+    match (get_id(&request), Client::connect(DB_URL.as_str(), NoTls)) {
         (Ok(id), Ok(mut client)) =>
             match client.query_one("SELECT * FROM users WHERE id = $1", &[&id]) {
                 Ok(row) => {
@@ -202,7 +206,7 @@ fn handle_get_all_request(_request: &str) -> (String, String) {
 fn handle_put_request(request: &str) -> (String, String) {
     match
         (
-            get_id(&request).parse::<i32>(),
+            get_id(&request),
             get_user_request_body(&request),
             Client::connect(DB_URL.as_str(), NoTls),
         )
@@ -223,7 +227,7 @@ fn handle_put_request(request: &str) -> (String, String) {
 
 //handle delete request
 fn handle_delete_request(request: &str) -> (String, String) {
-    match (get_id(&request).parse::<i32>(), Client::connect(DB_URL.as_str(), NoTls)) {
+    match (get_id(&request), Client::connect(DB_URL.as_str(), NoTls)) {
         (Ok(id), Ok(mut client)) => {
             let rows_affected = client.execute("DELETE FROM users WHERE id = $1", &[&id]).unwrap();
 
