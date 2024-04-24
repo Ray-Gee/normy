@@ -4,13 +4,15 @@ use std::env;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use dotenv::dotenv;
+use log::{info, warn};
+
 #[macro_use]
 extern crate lazy_static;
 
 #[macro_use]
 extern crate serde_derive;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct User {
     id: Option<i32>,
     name: String,
@@ -35,6 +37,8 @@ const NOT_FOUND: &str = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
 const INTERNAL_ERROR: &str = "HTTP/1.1 500 INTERNAL ERROR\r\n\r\n";
 
 fn main() {
+    env::set_var("RUST_LOG", "debug");
+    env_logger::init();
     println!("db: {:?}", DB_URL.as_str());
     if let Err(_) = set_database() {
         println!("Error");
@@ -91,7 +95,6 @@ fn handle_client(mut stream: TcpStream) {
     match stream.read(&mut buffer) {
         Ok(size) => {
             request.push_str(String::from_utf8_lossy(&buffer[..size]).as_ref());
-
             let (status_line, content) = match &*request {
                 r if r.starts_with("OPTIONS") => (OK_RESPONSE.to_string(), "".to_string()),
                 r if r.starts_with("POST /api/rust/users") => handle_post_request(r),
@@ -155,6 +158,7 @@ fn handle_post_request(request: &str) -> (String, String) {
 
 //handle get request
 fn handle_get_request(request: &str) -> (String, String) {
+    info!("request: {:?}", &request);
     match (get_id(&request).parse::<i32>(), Client::connect(DB_URL.as_str(), NoTls)) {
         (Ok(id), Ok(mut client)) =>
             match client.query_one("SELECT * FROM users WHERE id = $1", &[&id]) {
@@ -164,10 +168,13 @@ fn handle_get_request(request: &str) -> (String, String) {
                         name: row.get(1),
                         email: row.get(2),
                     };
-
+                    info!("User found: {:?}", user);
                     (OK_RESPONSE.to_string(), serde_json::to_string(&user).unwrap())
                 }
-                _ => (NOT_FOUND.to_string(), "User not found".to_string()),
+                _ => {
+                    warn!("Failed to fetch user:");
+                    (NOT_FOUND.to_string(), "User not found".to_string())
+                }
             }
 
         _ => (INTERNAL_ERROR.to_string(), "Internal error".to_string()),
