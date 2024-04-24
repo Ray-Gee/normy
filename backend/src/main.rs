@@ -5,6 +5,7 @@ use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use dotenv::dotenv;
 use log::{info, warn};
+use uuid::Uuid;
 
 #[macro_use]
 extern crate lazy_static;
@@ -119,15 +120,11 @@ fn handle_post_request(request: &str) -> (String, String) {
         Client::connect(DB_URL.as_str(), NoTls),
     ) {
         (Ok(user), Ok(mut client)) => {
-            // Insert the user and retrieve the ID
-            let row = client
-                .query_one(
-                    "INSERT INTO users (name, email) VALUES ($1, $2) RETURNING id",
-                    &[&user.name, &user.email],
-                )
-                .unwrap();
-
-            let user_id: i32 = row.get(0);
+            let user_id = Uuid::new_v4();
+            client.execute(
+                "INSERT INTO users (id, name, email) VALUES ($1, $2, $3)",
+                &[&user_id, &user.name, &user.email],
+            ).unwrap();
 
             // Fetch the created user data
             match client.query_one(
@@ -136,7 +133,7 @@ fn handle_post_request(request: &str) -> (String, String) {
             ) {
                 Ok(row) => {
                     let user = User {
-                        id: Some(row.get(0)),
+                        id: row.get(0),
                         name: row.get(1),
                         email: row.get(2),
                     };
