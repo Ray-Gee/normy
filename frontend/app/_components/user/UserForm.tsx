@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { createUser } from "../services/userService"
+import { createUser } from "@/_services/userService"
 
 interface UserFormProps {
   onUserAdded?: (user: User) => void

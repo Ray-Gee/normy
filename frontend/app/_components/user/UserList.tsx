@@ -1,6 +1,6 @@
 import React from "react"
-import { deleteUser } from "../services/userService"
-import { UserListProps, isExistingUser } from "../types"
+import { deleteUser } from "../../_services/userService"
+import { UserListProps, isExistingUser } from "../../definitions"
 
 const UserList: React.FC<UserListProps> = ({ users, onUserDeleted }) => {
   return (

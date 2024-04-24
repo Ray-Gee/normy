@@ -1,14 +1,14 @@
 "use client"
 import React, { useState, useEffect } from "react"
-import CardComponent from "./CardComponent"
+import CardComponent from "../CardComponent"
 import UserForm from "./UserForm"
-import { User, UserInterfaceProps } from "../types"
+import { User, UserInterfaceProps } from "../../definitions"
 import {
   listUsers,
   createUser,
   updateUser,
   deleteUser,
-} from "../services/userService"
+} from "../../_services/userService"
 
 const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
   const [users, setUsers] = useState<User[]>([])
