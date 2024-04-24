@@ -1,14 +1,33 @@
 "use client"
 import React, { useState, useEffect } from "react"
-import CardComponent from "../CardComponent"
-import UserForm from "./UserForm"
-import { User, UserInterfaceProps } from "../../definitions"
+import CardComponent from "@/_components/CardComponent"
+import UserForm from "@/_components/user/UserForm"
+import {
+  NewUser,
+  User,
+  UserInterfaceProps,
+  isExistingUser,
+  ExistingUser,
+} from "@/definitions"
 import {
   listUsers,
   createUser,
   updateUser,
   deleteUser,
-} from "../../_services/userService"
+} from "@/_services/userService"
+import {
+  Container,
+  Alert,
+  Button,
+  Center,
+  Flex,
+  Divider,
+  Paper,
+  SimpleGrid,
+  Stack,
+  TextInput,
+  Title,
+} from "@mantine/core"
 
 const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
   const [users, setUsers] = useState<User[]>([])
@@ -37,7 +56,7 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await listUsers()
+        const data: ExistingUser[] = await listUsers()
         setUsers(data.reverse())
       } catch (error) {
         console.error("Error fetching data:", error)
@@ -47,56 +66,51 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
     fetchData()
   }, [backendName])
 
-  const createUserWrapper = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    try {
-      const data = await createUser(newUser)
-      setUsers([data, ...users])
-      setNewUser({ name: "", email: "" })
-    } catch (error) {
-      console.error("Error creating user:", error)
-    }
-  }
+  // const createUserWrapper = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault()
+  //   try {
+  //     const data = await createUser(newUser)
+  //     setUsers([data, ...users])
+  //     setNewUser({ name: "", email: "" })
+  //   } catch (error) {
+  //     console.error("Error creating user:", error)
+  //   }
+  // }
 
-  const handleUpdateUser = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    try {
-      await updateUser(updatedUser.id, {
-        name: updatedUser.name,
-        email: updatedUser.email,
-      })
-      setUpdatedUser({ id: "", name: "", email: "" })
-      setUsers(
-        users.map((user) => {
-          if (user.id === parseInt(updatedUser.id)) {
-            return { ...user, name: updatedUser.name, email: updatedUser.email }
-          }
-          return user
-        })
-      )
-    } catch (error) {
-      console.error("Error updating user:", error)
-    }
-  }
+  // const handleUpdateUser = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault()
+  //   try {
+  //     await updateUser(updatedUser.id, {
+  //       name: updatedUser.name,
+  //       email: updatedUser.email,
+  //     })
+  //     setUpdatedUser({ id: "", name: "", email: "" })
+  // setUsers(
+  //   users.map((user) => {
+  //     if (user.id === parseInt(updatedUser.id)) {
+  //       return { ...user, name: updatedUser.name, email: updatedUser.email }
+  //     }
+  //     return user
+  //   })
+  // )
+  //   } catch (error) {
+  //     console.error("Error updating user:", error)
+  //   }
+  // }
 
-  const deleteUserWrapper = async (userId: number) => {
-    try {
-      await deleteUser(userId)
-      setUsers(users.filter((user) => user.id !== userId))
-    } catch (error) {
-      console.error("Error deleting user:", error)
-    }
-  }
+  // const deleteUserWrapper = async (userId: number) => {
+  //   try {
+  //     await deleteUser(userId)
+  //     setUsers(users.filter((user) => user.id !== userId))
+  //   } catch (error) {
+  //     console.error("Error deleting user:", error)
+  //   }
+  // }
 
   return (
     <div
       className={`user-interface ${bgColor} ${backendName} w-full max-w-md p-4 my-4 rounded shadow`}
     >
-      {/* <img
-        src={`/${backendName}logo.svg`}
-        alt={`${backendName} Logo`}
-        className="w-20 h-20 mb-6 mx-auto"
-      /> */}
       <h2 className="text-xl font-bold text-center text-white mb-6">{`${
         backendName.charAt(0).toUpperCase() + backendName.slice(1)
       } Backend`}</h2>
@@ -109,17 +123,17 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
             key={user.id}
             className="flex items-center justify-between bg-white p-4 rounded-lg shadow"
           >
-            {typeof user.id === "number" && <CardComponent card={user} />}
-            <button
+            {isExistingUser(user) && <CardComponent card={user} />}
+            <Button
               onClick={() => {
-                if (typeof user.id === "number") {
+                if (isExistingUser(user)) {
                   deleteUser(user.id)
                 }
               }}
               className={`${btnColor} text-white py-2 px-4 rounded`}
             >
-              Delete User
-            </button>
+              削除する
+            </Button>
           </div>
         ))}
       </div>

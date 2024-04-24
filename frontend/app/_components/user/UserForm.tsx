@@ -1,51 +1,68 @@
 import React, { useState } from "react"
 import { createUser } from "@/_services/userService"
+import type { NewUser, User } from "@/definitions"
+import {
+  Container,
+  Alert,
+  Button,
+  Center,
+  Flex,
+  Divider,
+  Paper,
+  SimpleGrid,
+  Stack,
+  TextInput,
+  Title,
+} from "@mantine/core"
 
 interface UserFormProps {
-  onUserAdded?: (user: User) => void
+  // onUserAdded?: (user: User) => void
   users: User[]
   setUsers: React.Dispatch<React.SetStateAction<User[]>>
 }
 
-interface User {
-  name: string
-  email: string
-}
+// interface User {
+//   name: string
+//   email: string
+// }
 
 const UserForm: React.FC<UserFormProps> = ({
   users,
   setUsers,
-  onUserAdded,
+  // onUserAdded,
 }) => {
   console.log("users:", users)
   console.log("setUsers:", setUsers)
-  const [newUser, setNewUser] = useState<User>({ name: "", email: "" })
+  const [newUser, setNewUser] = useState<NewUser>({ name: "", email: "" })
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const data = await createUser(newUser)
-    setUsers([data, ...users])
+    const createdUser = await createUser(newUser)
+    setUsers([createdUser as NewUser, ...users])
     setNewUser({ name: "", email: "" })
-    if (onUserAdded) {
-      onUserAdded(data)
-    }
+    // if (onUserAdded) {
+    //   onUserAdded(data)
+    // }
   }
 
   return (
     <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="Name"
+      <TextInput
+        // type="text"
+        label="Username"
+        withAsterisk
         value={newUser.name}
         onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
       />
-      <input
-        type="email"
-        placeholder="Email"
+      <TextInput
+        // type="email"
+        label="Email"
+        withAsterisk
+        placeholder="sample@sample.com"
         value={newUser.email}
         onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
       />
-      <button type="submit">Add User</button>
+      <Button type="submit">新規作成する</Button>
     </form>
   )
 }
