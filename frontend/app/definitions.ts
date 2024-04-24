@@ -14,11 +14,11 @@ export interface ExistingUser extends BaseUser {
 export type User = NewUser | ExistingUser
 
 export function isExistingUser(user: User): user is ExistingUser {
-  return typeof user.id === "number"
+  return typeof user.id === "string"
 }
 
 export interface Card {
-  id: number
+  id: string
   name: string
   email: string
 }
