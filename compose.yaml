@@ -10,7 +10,7 @@ services:
       - 3000:3000
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - node-modules:/node_modules
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8080
       # - NODE_ENV=production
@@ -56,3 +56,4 @@ volumes:
   pgdata:
   cargo_registry:
   cargo_git:
+  node-modules:
