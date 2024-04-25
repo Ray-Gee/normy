@@ -16,7 +16,7 @@ import {
   TextInput,
   Title,
 } from "@mantine/core"
-import { useForm } from "@mantine/form"
+import { UserForm } from '@/_utils/UserForm';
 // import { IconAlertCircle } from "@tabler/icons-react"
 
 export default function EditUserForm({ user }: { user: ExistingUser }) {
@@ -24,17 +24,9 @@ export default function EditUserForm({ user }: { user: ExistingUser }) {
   const router = useRouter()
   // const { isPending, mutate } = useCreateCompany();
 
-  const form = useForm({
-    initialValues: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-    },
-    validate: {
-      name: (value) => (value ? null : "Name is required"),
-      email: (value) =>
-        /^\S+@\S+\.\S+$/.test(value) ? null : "Invalid email format",
-    },
+  const form = UserForm({
+    name: user.name,
+    email: user.email,
   })
 
   const handleSubmit = async (values: any) => {

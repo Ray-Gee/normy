@@ -4,13 +4,17 @@ import type { NewUser, User, ExistingUser } from "@/definitions"
 import { notFound } from "next/navigation"
 
 interface withId {
-  id: string;
+  id: string
 }
 
-async function apiRequest<T>(method: 'get' | 'post' | 'put' | 'delete', url: string, data?: any): Promise<T> {
+async function apiRequest<T>(
+  method: "get" | "post" | "put" | "delete",
+  url: string,
+  data?: any
+): Promise<T> {
   try {
-    const response = await axios({ method, url, data });
-    return response.data;
+    const response = await axios({ method, url, data })
+    return response.data
   } catch (error) {
     console.error("Error api request:", error)
     throw error
@@ -27,9 +31,9 @@ export const getUser = async (id: string): Promise<ExistingUser> => {
 
 export async function fetchData<T>({
   id,
-  getData
+  getData,
 }: {
-  id: string,
+  id: string
   getData: (id: string) => Promise<T>
 }) {
   try {
@@ -46,39 +50,40 @@ export const createUser = async (user: NewUser): Promise<ExistingUser> => {
 }
 
 export const createWrapper = async <T, U>({
-  e,
+  values,
   items,
-  newItem,
   setItems,
-  setNewItem,
   createData,
 }: {
-  e: React.FormEvent<HTMLFormElement>
+  values: U
   items: T[]
-  newItem: U
   setItems: (items: T[]) => void
-  setNewItem: React.Dispatch<React.SetStateAction<U>>
   createData: (item: U) => Promise<T>
 }): Promise<void> => {
-  e.preventDefault()
+  console.log("values:", values)
   try {
-    const createdItem = await createData(newItem)
+    const createdItem = await createData(values)
     setItems([...items, createdItem])
-    setNewItem({ name: "", email: "" } as U)
   } catch (error) {
     console.error("Error creating item:", error)
   }
 }
 
-export const updateData = async <T,>({endpoint, data}: {endpoint: string, data: T}): Promise<T> => {
-  return await apiRequest<T>("put", endpoint, data);
-};
+export const updateData = async <T,>({
+  endpoint,
+  data,
+}: {
+  endpoint: string
+  data: T
+}): Promise<T> => {
+  return await apiRequest<T>("put", endpoint, data)
+}
 
 export const updateUser = async (id: string, userData: User): Promise<User> => {
   return updateData<User>({
     endpoint: API_ENDPOINTS.USER(id),
-    data: userData
-  });
+    data: userData,
+  })
 }
 
 export const deleteUser = async (userId: string): Promise<void> => {
@@ -91,9 +96,9 @@ export const deleteWrapper = async <T extends withId>({
   setItems,
   deleteData,
 }: {
-  item: T,
-  items: T[],
-  setItems: React.Dispatch<React.SetStateAction<T[]>>,
+  item: T
+  items: T[]
+  setItems: React.Dispatch<React.SetStateAction<T[]>>
   deleteData: (itemId: string) => Promise<void>
 }): Promise<void> => {
   try {
