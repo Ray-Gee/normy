@@ -66,17 +66,6 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
     fetchData()
   }, [backendName])
 
-  // const createUserWrapper = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault()
-  //   try {
-  //     const data = await createUser(newUser)
-  //     setUsers([data, ...users])
-  //     setNewUser({ name: "", email: "" })
-  //   } catch (error) {
-  //     console.error("Error creating user:", error)
-  //   }
-  // }
-
   // const handleUpdateUser = async (e: React.FormEvent<HTMLFormElement>) => {
   //   e.preventDefault()
   //   try {
@@ -125,9 +114,11 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
           >
             {isExistingUser(user) && <CardComponent card={user} />}
             <Button
-              onClick={() => {
+              onClick={async () => {
                 if (isExistingUser(user)) {
-                  deleteUser(user.id)
+                  await deleteUser(user.id)
+                  const updatedUsers = users.filter((u) => u.id !== user.id)
+                  setUsers(updatedUsers)
                 }
               }}
               className={`${btnColor} text-white py-2 px-4 rounded`}

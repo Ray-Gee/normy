@@ -37,9 +37,13 @@ const UserForm: React.FC<UserFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const createdUser = await createUser(newUser)
-    setUsers([createdUser as NewUser, ...users])
-    setNewUser({ name: "", email: "" })
+    try {
+      const createdUser = await createUser(newUser)
+      setUsers([createdUser as NewUser, ...users])
+      setNewUser({ name: "", email: "" })
+    } catch (error) {
+      console.error("Error creating user:", error)
+    }
     // if (onUserAdded) {
     //   onUserAdded(data)
     // }
