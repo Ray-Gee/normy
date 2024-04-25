@@ -3,8 +3,9 @@ import type { Metadata } from "next"
 import "./globals.css"
 import React from "react"
 import { MantineProvider, ColorSchemeScript } from "@mantine/core"
+import { LangProvider } from "@/_intl/intlContext"
+import { theme } from "@/theme"
 // import { Inter } from "next/font/google"
-// import { theme } from "@/theme"
 // const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -30,36 +31,10 @@ export default function RootLayout({
       <body>
         <MantineProvider
           theme={{
-            components: {
-              Container: {
-                defaultProps: {
-                  style: { maxWidth: 480, padding: 16, margin: "16px auto" },
-                },
-              },
-              Button: {
-                defaultProps: {
-                  style: { margin: "20px 0" },
-                  radius: "md",
-                },
-              },
-              Card: {
-                defaultProps: {
-                  style: { backgroundColor: "white", marginBottom: 16 },
-                  shadow: "sm",
-                  p: "lg",
-                  radius: "md",
-                },
-              },
-              Title: {
-                defaultProps: {
-                  style: { marginBottom: 14 },
-                  order: 2,
-                },
-              },
-            },
+            ...theme,
           }}
         >
-          {children}
+          <LangProvider>{children}</LangProvider>
         </MantineProvider>
       </body>
     </html>
