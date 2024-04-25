@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react"
 import type { ExistingUser } from "@/definitions"
 import Form from "@/_components/user/EditForm"
 // import Breadcrumbs from "@/app/ui/invoices/breadcrumbs"
-import { fetchUser, updateUser } from "@/_services/userService"
+import { getUser, fetchData } from "@/_services/userService"
 
 export default function Page({ params }: { params: { id: string } }) {
   const [user, setUser] = useState<ExistingUser>()
@@ -11,7 +11,10 @@ export default function Page({ params }: { params: { id: string } }) {
   // const [invoice, customers] = await Promise.all([getUser(id)])
 
   useEffect(() => {
-    fetchUser(id).then((user) => {
+    fetchData<ExistingUser>({
+      id,
+      getData: getUser,
+    }).then((user) => {
       setUser(user)
     })
   }, [id])

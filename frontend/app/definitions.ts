@@ -31,3 +31,8 @@ export interface UserListProps {
   users: User[]
   onUserDeleted?: (userId: string) => void
 }
+
+export interface CreateFormProps<T> {
+  items: T[];
+  setItems: React.Dispatch<React.SetStateAction<T[]>>;
+}

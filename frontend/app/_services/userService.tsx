@@ -1,42 +1,105 @@
 import axios from "axios"
 import { API_ENDPOINTS } from "@/_api/endPoints"
-import type { User, ExistingUser } from "@/definitions"
+import type { NewUser, User, ExistingUser } from "@/definitions"
 import { notFound } from "next/navigation"
 
-export const listUsers = async (): Promise<ExistingUser[]> => {
-  const response = await axios.get<ExistingUser[]>(API_ENDPOINTS.USERS)
-  return response.data
+interface withId {
+  id: string;
 }
 
-export const getUser = async (id: string): Promise<ExistingUser> => {
-  const response = await axios.get<ExistingUser>(`${API_ENDPOINTS.USERS}/${id}`)
-  return response.data
-}
-
-export async function fetchUser(id: string) {
+async function apiRequest<T>(method: 'get' | 'post' | 'put' | 'delete', url: string, data?: any): Promise<T> {
   try {
-    const user = await getUser(id)
-    return user
+    const response = await axios({ method, url, data });
+    return response.data;
   } catch (error) {
-    console.error("Error fetching user data:", error)
+    console.error("Error api request:", error)
     throw error
   }
 }
 
-export const createUser = async (userData: User): Promise<User> => {
-  const response = await axios.post<User>(API_ENDPOINTS.USERS, userData)
-  return response.data
+export const listUsers = async (): Promise<ExistingUser[]> => {
+  return await apiRequest<ExistingUser[]>("get", API_ENDPOINTS.USERS)
 }
 
-export const updateUser = async (
-  userId: string,
-  userData: User
-): Promise<User> => {
-  const response = await axios.put<User>(API_ENDPOINTS.USER(userId), userData)
-  return response.data
+export const getUser = async (id: string): Promise<ExistingUser> => {
+  return await apiRequest<ExistingUser>("get", `${API_ENDPOINTS.USERS}/${id}`)
+}
+
+export async function fetchData<T>({
+  id,
+  getData
+}: {
+  id: string,
+  getData: (id: string) => Promise<T>
+}) {
+  try {
+    const data = await getData(id)
+    return data
+  } catch (error) {
+    console.error("Error fetching data:", error)
+    throw error
+  }
+}
+
+export const createUser = async (user: NewUser): Promise<ExistingUser> => {
+  return await apiRequest<ExistingUser>("post", API_ENDPOINTS.USERS, user)
+}
+
+export const createWrapper = async <T, U>({
+  e,
+  items,
+  newItem,
+  setItems,
+  setNewItem,
+  createData,
+}: {
+  e: React.FormEvent<HTMLFormElement>
+  items: T[]
+  newItem: U
+  setItems: (items: T[]) => void
+  setNewItem: React.Dispatch<React.SetStateAction<U>>
+  createData: (item: U) => Promise<T>
+}): Promise<void> => {
+  e.preventDefault()
+  try {
+    const createdItem = await createData(newItem)
+    setItems([...items, createdItem])
+    setNewItem({ name: "", email: "" } as U)
+  } catch (error) {
+    console.error("Error creating item:", error)
+  }
+}
+
+export const updateData = async <T,>({endpoint, data}: {endpoint: string, data: T}): Promise<T> => {
+  return await apiRequest<T>("put", endpoint, data);
+};
+
+export const updateUser = async (id: string, userData: User): Promise<User> => {
+  return updateData<User>({
+    endpoint: API_ENDPOINTS.USER(id),
+    data: userData
+  });
 }
 
 export const deleteUser = async (userId: string): Promise<void> => {
-  const url = `${API_ENDPOINTS.USERS}/${userId}`
-  await axios.delete(url)
+  await apiRequest("delete", `${API_ENDPOINTS.USERS}/${userId}`)
+}
+
+export const deleteWrapper = async <T extends withId>({
+  item,
+  items,
+  setItems,
+  deleteData,
+}: {
+  item: T,
+  items: T[],
+  setItems: React.Dispatch<React.SetStateAction<T[]>>,
+  deleteData: (itemId: string) => Promise<void>
+}): Promise<void> => {
+  try {
+    await deleteData(item.id)
+    setItems(items.filter((i) => i.id !== item.id))
+  } catch (error) {
+    console.error("Error deleting user:", error)
+  }
 }

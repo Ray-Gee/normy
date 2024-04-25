@@ -1,42 +1,21 @@
 "use client"
 import React, { useState, useEffect } from "react"
 import CardComponent from "@/_components/CardComponent"
-import UserForm from "@/_components/user/UserForm"
-import {
-  NewUser,
+import { CreateForm } from "@/_components/user/CreateForm"
+import type {
   User,
+  NewUser,
   UserInterfaceProps,
-  isExistingUser,
   ExistingUser,
-} from "@/definitions"
+} from "@/definitions";
 import {
-  listUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-} from "@/_services/userService"
-import {
-  Container,
-  Alert,
-  Button,
-  Center,
-  Flex,
-  Divider,
-  Paper,
-  SimpleGrid,
-  Stack,
-  TextInput,
-  Title,
-} from "@mantine/core"
+  isExistingUser
+} from "@/definitions";
+import { listUsers, deleteWrapper, deleteUser } from "@/_services/userService"
+import { Container, Title, Button, Card, Flex, Group, Box } from "@mantine/core"
 
 const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
-  const [users, setUsers] = useState<User[]>([])
-  const [newUser, setNewUser] = useState({ name: "", email: "" })
-  const [updatedUser, setUpdatedUser] = useState({
-    id: "",
-    name: "",
-    email: "",
-  })
+  const [users, setUsers] = useState<ExistingUser[]>([])
 
   const backgroundColors: { [key: string]: string } = {
     rust: "bg-orange-500",
@@ -66,68 +45,45 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
     fetchData()
   }, [backendName])
 
-  // const handleUpdateUser = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault()
-  //   try {
-  //     await updateUser(updatedUser.id, {
-  //       name: updatedUser.name,
-  //       email: updatedUser.email,
-  //     })
-  //     setUpdatedUser({ id: "", name: "", email: "" })
-  // setUsers(
-  //   users.map((user) => {
-  //     if (user.id === parseInt(updatedUser.id)) {
-  //       return { ...user, name: updatedUser.name, email: updatedUser.email }
-  //     }
-  //     return user
-  //   })
-  // )
-  //   } catch (error) {
-  //     console.error("Error updating user:", error)
-  //   }
-  // }
-
-  // const deleteUserWrapper = async (userId: number) => {
-  //   try {
-  //     await deleteUser(userId)
-  //     setUsers(users.filter((user) => user.id !== userId))
-  //   } catch (error) {
-  //     console.error("Error deleting user:", error)
-  //   }
-  // }
-
   return (
     <div
       className={`user-interface ${bgColor} ${backendName} w-full max-w-md p-4 my-4 rounded shadow`}
     >
-      <h2 className="text-xl font-bold text-center text-white mb-6">{`${
-        backendName.charAt(0).toUpperCase() + backendName.slice(1)
-      } Backend`}</h2>
+      <Container
+        className={`user-interface ${bgColor} ${backendName}`}
+      >
+        <Title>
+          ユーザー一覧
+        </Title>
 
-      <UserForm users={users} setUsers={setUsers} />
-      {/* Display users */}
-      <div className="space-y-4">
-        {users.map((user) => (
-          <div
-            key={user.id}
-            className="flex items-center justify-between bg-white p-4 rounded-lg shadow"
-          >
-            {isExistingUser(user) && <CardComponent card={user} />}
+        <CreateForm items={users} setItems={setUsers} />
+
+        <div>
+          {users.map((user) => (
+            <Card
+              key={user.id}
+            >
+              <Group grow>
+            {isExistingUser(user) ? <CardComponent card={user} /> : <div></div>}
             <Button
               onClick={async () => {
                 if (isExistingUser(user)) {
-                  await deleteUser(user.id)
-                  const updatedUsers = users.filter((u) => u.id !== user.id)
-                  setUsers(updatedUsers)
+                  await deleteWrapper<ExistingUser>({
+                    item: user,
+                    items: users,
+                    setItems: setUsers,
+                    deleteData: deleteUser,
+                  });
                 }
               }}
-              className={`${btnColor} text-white py-2 px-4 rounded`}
             >
-              削除する
+              削除
             </Button>
-          </div>
-        ))}
-      </div>
+          </Group>
+            </Card>
+          ))}
+        </div>
+      </Container>
     </div>
   )
 }

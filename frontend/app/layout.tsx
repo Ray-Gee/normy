@@ -1,4 +1,4 @@
-import '@mantine/core/styles.css';
+import "@mantine/core/styles.css"
 import type { Metadata } from "next"
 import "./globals.css"
 import React from "react"
@@ -28,7 +28,39 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <MantineProvider>{children}</MantineProvider>
+        <MantineProvider
+          theme={{
+            components: {
+              Container: {
+                defaultProps: {
+                  style: { maxWidth: 480, padding: 16, margin: "16px auto" },
+                },
+              },
+              Button: {
+                defaultProps: {
+                  style: { margin: "20px 0" },
+                  radius: "md",
+                },
+              },
+              Card: {
+                defaultProps: {
+                  style: { backgroundColor: "white", marginBottom: 16 },
+                  shadow: "sm",
+                  p: "lg",
+                  radius: "md",
+                },
+              },
+              Title: {
+                defaultProps: {
+                  style: { marginBottom: 14 },
+                  order: 2,
+                },
+              },
+            },
+          }}
+        >
+          {children}
+        </MantineProvider>
       </body>
     </html>
   )

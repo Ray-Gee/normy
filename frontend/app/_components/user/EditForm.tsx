@@ -1,9 +1,8 @@
 "use client"
-import React, { useState } from "react"
+import React from "react"
 import { useRouter } from "next/navigation"
 import type { ExistingUser } from "@/definitions"
 import { updateUser } from "@/_services/userService"
-// import { useForm } from "react-hook-form"
 import {
   Container,
   Alert,
@@ -23,28 +22,13 @@ import { useForm } from "@mantine/form"
 export default function EditUserForm({ user }: { user: ExistingUser }) {
   console.log("user:", user)
   const router = useRouter()
-  const [existingUser, setExistingUser] = useState<ExistingUser>({
-    id: user.id,
-    name: user.name,
-    email: user.email,
-  })
-  // const [email, setEmail] = useState<string>(user.email)
-  // const initialState = { name: "", email: "" }
-  // const updateUserWithId = updateUser.bind(null, user.id)
-  // const [state, dispatch] = useFormState(updateUserWithId, initialState)
   // const { isPending, mutate } = useCreateCompany();
-  // const {
-  //   handleSubmit,
-  //   register,
-  //   formState: { errors, isSubmitting },
-  // } = useForm()
-  // module not foundエラーになる
 
   const form = useForm({
     initialValues: {
-      id: existingUser.id,
-      email: existingUser.email,
-      name: existingUser.name,
+      id: user.id,
+      email: user.email,
+      name: user.name,
     },
     validate: {
       name: (value) => (value ? null : "Name is required"),
@@ -53,14 +37,12 @@ export default function EditUserForm({ user }: { user: ExistingUser }) {
     },
   })
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    // const onSubmit = handleSubmit(async (data) => {
-    // console.log("data:", data)
-    e.preventDefault()
+  const handleSubmit = async (values: any) => {
+    console.log("values:", values)
     try {
-      const updatedUser = await updateUser(existingUser.id, {
-        name: existingUser.name,
-        email: existingUser.email,
+      const updatedUser = await updateUser(values.id, {
+        name: values.name,
+        email: values.email,
       })
       console.log("updatedUser:", updatedUser)
       router.push("/")
@@ -84,7 +66,7 @@ export default function EditUserForm({ user }: { user: ExistingUser }) {
             <Title order={1}>ユーザー編集</Title>
           </Center>
           <Paper withBorder p="xl" radius="sm">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={form.onSubmit(handleSubmit)}>
               <Flex direction="column" gap="md">
                 <SimpleGrid cols={1}>
                   <Alert color="red">あらーと</Alert>
@@ -92,32 +74,20 @@ export default function EditUserForm({ user }: { user: ExistingUser }) {
                 <Title order={2}>アカウント</Title>
                 <SimpleGrid cols={1}>
                   <TextInput
-                    value={existingUser.name}
-                    onChange={(e) =>
-                      setExistingUser({
-                        ...existingUser,
-                        name: e.target.value,
-                      })
-                    }
+                    {...form.getInputProps("name")}
                     withAsterisk
                     label="Username"
                   />
                   <TextInput
-                    value={existingUser.email}
-                    onChange={(e) =>
-                      setExistingUser({
-                        ...existingUser,
-                        email: e.target.value,
-                      })
-                    }
+                    {...form.getInputProps("email")}
                     withAsterisk
                     label="Email"
                     placeholder="sample@sample.com"
                   />
                 </SimpleGrid>
-                <Button type="submit" variant="filled">
-                  編集する
-                </Button>
+                <Flex justify="flex-end">
+                  <Button type="submit">編集</Button>
+                </Flex>
                 <Divider labelPosition="center"></Divider>
               </Flex>
             </form>
