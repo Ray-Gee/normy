@@ -5,6 +5,8 @@ import React from "react"
 import { MantineProvider, ColorSchemeScript } from "@mantine/core"
 import { LangProvider } from "@/_intl/intlContext"
 import { theme } from "@/theme"
+import { Notifications } from '@mantine/notifications';
+import '@mantine/notifications/styles.css';
 // import { Inter } from "next/font/google"
 // const inter = Inter({ subsets: ["latin"] })
 
@@ -34,6 +36,7 @@ export default function RootLayout({
             ...theme,
           }}
         >
+          <Notifications position="top-right"/>
           <LangProvider>{children}</LangProvider>
         </MantineProvider>
       </body>

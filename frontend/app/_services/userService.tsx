@@ -12,6 +12,7 @@ async function apiRequest<T>(
   url: string,
   data?: any
 ): Promise<T> {
+  console.log('data:', data);
   try {
     const response = await axios({ method, url, data })
     return response.data
@@ -66,6 +67,7 @@ export const createWrapper = async <T, U>({
     setItems([...items, createdItem])
   } catch (error) {
     console.error("Error creating item:", error)
+    throw new Error("error createWrapper");
   }
 }
 

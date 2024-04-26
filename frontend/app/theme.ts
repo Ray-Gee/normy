@@ -25,5 +25,11 @@ export const theme = {
         order: 2,
       },
     },
+    Group: {
+      defaultProps: {
+        style: { marginTop: 10, padding: '0 10px' },
+        order: 2,
+      },
+    },
   }
 }
