@@ -1,5 +1,5 @@
 import React from "react";
-import UserInterface from "./_components/user/UserInterface";
+import UserInterface from "@/_components/user/UserInterface";
 
 const Home: React.FC = () => {
   return (
