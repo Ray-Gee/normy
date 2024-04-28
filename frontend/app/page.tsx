@@ -1,14 +1,12 @@
-import React from "react"
-import UserInterface from "./_components/user/UserInterface"
+import React from "react";
+import UserInterface from "./_components/user/UserInterface";
 
 const Home: React.FC = () => {
   return (
-    <main className="flex flex-wrap justify-center items-start min-h-screen bg-gray-100">
-      <div className="m-4">
-        <UserInterface backendName="rust" />
-      </div>
-    </main>
-  )
-}
+    <>
+      <UserInterface backendName="rust" />
+    </>
+  );
+};
 
-export default Home
+export default Home;
