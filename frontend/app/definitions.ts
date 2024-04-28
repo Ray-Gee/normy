@@ -1,3 +1,6 @@
+import { IconProps, Icon } from '@tabler/icons-react';
+import * as react from 'react';
+
 export interface BaseUser {
   name: string
   email: string
@@ -35,4 +38,12 @@ export interface UserListProps {
 export interface CreateFormProps<T> {
   items: T[];
   setItems: React.Dispatch<React.SetStateAction<T[]>>;
+}
+
+export interface NavItem {
+	label: string;
+	icon: react.ForwardRefExoticComponent<Omit<IconProps, "ref"> & react.RefAttributes<Icon>>
+	link?: string;
+	initiallyOpened?: boolean;
+	links?: { label: string; link: string }[];
 }

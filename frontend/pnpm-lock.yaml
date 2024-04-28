@@ -8,9 +8,6 @@ dependencies:
   '@mantine/core':
     specifier: ^7.8.1
     version: 7.8.1(@mantine/hooks@7.8.1)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-  '@mantine/ds':
-    specifier: ^7.2.2
-    version: 7.2.2(@mantine/code-highlight@7.2.2)(@mantine/core@7.8.1)(@mantine/hooks@7.8.1)(@tabler/icons-react@2.47.0)(react-dom@18.2.0)(react@18.2.0)
   '@mantine/form':
     specifier: ^7.8.1
     version: 7.8.1(react@18.2.0)
@@ -20,9 +17,9 @@ dependencies:
   '@mantine/notifications':
     specifier: ^7.8.1
     version: 7.8.1(@mantine/core@7.8.1)(@mantine/hooks@7.8.1)(react-dom@18.2.0)(react@18.2.0)
-  '@tabler/icons':
+  '@tabler/icons-react':
     specifier: ^3.2.0
-    version: 3.2.0
+    version: 3.2.0(react@18.2.0)
   '@tanstack/react-query':
     specifier: ^5.18.1
     version: 5.32.0(react@18.2.0)
@@ -2092,22 +2089,6 @@ packages:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
 
-  /@mantine/code-highlight@7.2.2(@mantine/core@7.8.1)(@mantine/hooks@7.8.1)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-zR3J8TvHVZjXESTLNd49pZobhJIZcXUr0CGLs8F4TdnslIoN4SNWipQCPa0kDw7qO5CJhfMqgMeEYNh/slPpPg==}
-    peerDependencies:
-      '@mantine/core': 7.2.2
-      '@mantine/hooks': 7.2.2
-      react: ^18.2.0
-      react-dom: ^18.2.0
-    dependencies:
-      '@mantine/core': 7.8.1(@mantine/hooks@7.8.1)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@mantine/hooks': 7.8.1(react@18.2.0)
-      clsx: 2.0.0
-      highlight.js: 11.9.0
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
   /@mantine/core@7.8.1(@mantine/hooks@7.8.1)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-dttbP2BhBzFJYBqgAQedJRca5+MXlJbppRhRsufnFeO7YC/UpZutOoHQ9dxGEQnhAWJ/d+wuRvYWG/gXex+wYQ==}
     peerDependencies:
@@ -2126,25 +2107,6 @@ packages:
       type-fest: 4.16.0
     transitivePeerDependencies:
       - '@types/react'
-    dev: false
-
-  /@mantine/ds@7.2.2(@mantine/code-highlight@7.2.2)(@mantine/core@7.8.1)(@mantine/hooks@7.8.1)(@tabler/icons-react@2.47.0)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-9YacgCHLCge+OMepbpW873o1/R9dLxtxEElpnCtyD3hEJdKuBFK4PpPEjBtol6gsbNxYdwVyIPCTkgFKV8zHlg==}
-    peerDependencies:
-      '@mantine/code-highlight': 7.2.2
-      '@mantine/core': 7.2.2
-      '@mantine/hooks': 7.2.2
-      '@tabler/icons-react': ^2.29.0
-      react: ^18.2.0
-      react-dom: ^18.2.0
-    dependencies:
-      '@mantine/code-highlight': 7.2.2(@mantine/core@7.8.1)(@mantine/hooks@7.8.1)(react-dom@18.2.0)(react@18.2.0)
-      '@mantine/core': 7.8.1(@mantine/hooks@7.8.1)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@mantine/hooks': 7.8.1(react@18.2.0)
-      '@tabler/icons-react': 2.47.0(react@18.2.0)
-      clsx: 2.0.0
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /@mantine/form@7.8.1(react@18.2.0):
@@ -3290,18 +3252,13 @@ packages:
     dependencies:
       tslib: 2.6.2
 
-  /@tabler/icons-react@2.47.0(react@18.2.0):
-    resolution: {integrity: sha512-iqly2FvCF/qUbgmvS8E40rVeYY7laltc5GUjRxQj59DuX0x/6CpKHTXt86YlI2whg4czvd/c8Ce8YR08uEku0g==}
+  /@tabler/icons-react@3.2.0(react@18.2.0):
+    resolution: {integrity: sha512-b1mZT1XpZrzvbM+eFe1YbYbxkzgJ18tM4knZKqXh0gnHDZ6XVLIH3TzJZ3HZ7PTkUqZLZ7XcGae3qQVGburlBw==}
     peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0
+      react: '>= 16'
     dependencies:
-      '@tabler/icons': 2.47.0
-      prop-types: 15.8.1
+      '@tabler/icons': 3.2.0
       react: 18.2.0
-    dev: false
-
-  /@tabler/icons@2.47.0:
-    resolution: {integrity: sha512-4w5evLh+7FUUiA1GucvGj2ReX2TvOjEr4ejXdwL/bsjoSkof6r1gQmzqI+VHrE2CpJpB3al7bCTulOkFa/RcyA==}
     dev: false
 
   /@tabler/icons@3.2.0:
@@ -4781,11 +4738,6 @@ packages:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
     dev: true
-
-  /clsx@2.0.0:
-    resolution: {integrity: sha512-rQ1+kcj+ttHG0MKVGBUXwayCCF1oh39BF5COIpRzuCEv8Mwjv0XucrI2ExNTOn9IlLifGClWQcU9BrZORvtw6Q==}
-    engines: {node: '>=6'}
-    dev: false
 
   /clsx@2.1.0:
     resolution: {integrity: sha512-m3iNNWpd9rl3jvvcBnu70ylMdrXt8Vlq4HYadnU5fwcOtvkSQWPmj7amUcDT2qYI7risszBjI5AUIUox9D16pg==}
@@ -6727,11 +6679,6 @@ packages:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
     dev: true
-
-  /highlight.js@11.9.0:
-    resolution: {integrity: sha512-fJ7cW7fQGCYAkgv4CPfwFHrfd/cLS4Hau96JuJ+ZTOWhjnhoeN1ub1tFmALm/+lW5z4WCAuAV9bm05AP0mS6Gw==}
-    engines: {node: '>=12.0.0'}
-    dev: false
 
   /hmac-drbg@1.0.1:
     resolution: {integrity: sha512-Tti3gMqLdZfhOQY1Mzf/AanLiqh1WTiJgEj26ZuYQ9fbkLomzGchCws4FyrSd4VkpBfiNhaE1On+lOz894jvXg==}
