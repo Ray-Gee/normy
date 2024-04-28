@@ -1,12 +1,15 @@
-import React from 'react';
-import { MantineProvider } from '@mantine/core';
-import { LangProvider } from '@/_intl/intlContext';
-import { theme } from '@/theme';
+import React from "react";
+import { MantineProvider } from "@mantine/core";
+import { LangProvider } from "@/_intl/intlContext";
+import { theme } from "@/theme";
+import { ClientProviders } from "@/_components/ClientProviders";
 
-export const GlobalProviders: React.FC<{children: React.ReactNode}> = ({ children }) => (
+export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
   <MantineProvider theme={theme}>
-    <LangProvider>
-      {children}
-    </LangProvider>
+    <ClientProviders>
+      <LangProvider>{children}</LangProvider>
+    </ClientProviders>
   </MantineProvider>
 );
