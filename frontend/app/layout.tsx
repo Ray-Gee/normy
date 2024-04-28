@@ -2,9 +2,9 @@ import "@mantine/core/styles.css"
 import type { Metadata } from "next"
 import "./globals.css"
 import React from "react"
-import { MantineProvider, ColorSchemeScript } from "@mantine/core"
-import { LangProvider } from "@/_intl/intlContext"
-import { theme } from "@/theme"
+import { ColorSchemeScript } from "@mantine/core"
+import { GlobalProviders } from "@/_components/providers"
+import { DashboardLayout } from '@/_components/DashboardLayout';
 import { Notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
 // import { Inter } from "next/font/google"
@@ -31,14 +31,12 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <MantineProvider
-          theme={{
-            ...theme,
-          }}
-        >
+          <GlobalProviders>
           <Notifications position="top-right"/>
-          <LangProvider>{children}</LangProvider>
-        </MantineProvider>
+            <DashboardLayout>
+            {children}
+            </DashboardLayout>
+          </GlobalProviders>
       </body>
     </html>
   )

@@ -10,7 +10,7 @@ interface Props {
 	children: React.ReactNode;
 }
 
-export default function DashboardLayout({ children }: Props) {
+export function DashboardLayout({ children }: Props) {
 	const [opened, { toggle }] = useDisclosure();
 	const { colorScheme } = useMantineColorScheme();
 	const theme = useMantineTheme();
@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }: Props) {
 			<AppShell.Main bg={bg}>{children}</AppShell.Main>
 			<AppShell.Footer>
 				<Text w="full" size="sm" c="gray">
-					CopyRight © 2023 Jotyy
+					CopyRight © 2023 Ueda
 				</Text>
 			</AppShell.Footer>
 		</AppShell>
