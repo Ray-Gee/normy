@@ -1,5 +1,5 @@
-import { useForm } from "@mantine/form"
-import { validateName, validateEmail } from "@/_utils/validations"
+import { useForm } from "@mantine/form";
+import { validateEmail, validateName } from "@/_utils/validations";
 
 export const UserForm = (initialValues: { name: string; email: string }) => {
   return useForm({
@@ -8,5 +8,5 @@ export const UserForm = (initialValues: { name: string; email: string }) => {
       name: validateName,
       email: validateEmail,
     },
-  })
-}
+  });
+};
