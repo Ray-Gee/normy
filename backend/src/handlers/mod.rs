@@ -1,148 +1,101 @@
-use postgres::{Client, NoTls};
-use uuid::Uuid;
-use log::{info, warn};
-use crate::models::User;
 use crate::config;
+use crate::db::{
+    create_user, delete_user, fetch_all_users, fetch_user, fetch_user_by_id, update_user,
+};
+use crate::models::User;
+use actix_web::{web, HttpResponse, Responder};
+use log::{debug, error, info};
+use std::future::Future;
+use tokio_postgres::{tls::NoTlsStream, Client, Connection, Error, NoTls, Socket};
+use uuid::Uuid;
 
-pub fn get_user_request_body(request: &str) -> Result<User, serde_json::Error> {
-    serde_json::from_str(request.split("\r\n\r\n").last().unwrap_or_default())
-}
-
-pub fn handle_post_request(request: &str) -> (String, String) {
-    match (
-        get_user_request_body(request),
-        Client::connect(config::DB_URL.as_str(), NoTls),
-    ) {
-        (Ok(user), Ok(mut client)) => {
-            let user_id = Uuid::new_v4();
-            client.execute(
-                "INSERT INTO users (id, name, email) VALUES ($1, $2, $3)",
-                &[&user_id, &user.name, &user.email],
-            ).unwrap();
-
-            // Fetch the created user data
-            match client.query_one(
-                "SELECT id, name, email FROM users WHERE id = $1",
-                &[&user_id],
-            ) {
-                Ok(row) => {
-                    let user = User {
-                        id: row.get(0),
-                        name: row.get(1),
-                        email: row.get(2),
-                    };
-
-                    (
-                        config::constants::OK_RESPONSE.to_string(),
-                        serde_json::to_string(&user).unwrap(),
-                    )
+pub async fn post_user_handler(user: web::Json<User>) -> impl Responder {
+    with_db_connection(|client| async move {
+        match create_user(&client, &user.into_inner()).await {
+            Ok(user_id) => match fetch_user(&client, user_id).await {
+                Ok(user) => HttpResponse::Ok().json(user),
+                Err(_) => {
+                    HttpResponse::InternalServerError().body("Failed to retrieve created user")
                 }
-                Err(_) => (
-                    config::constants::INTERNAL_ERROR.to_string(),
-                    "Failed to retrieve created user".to_string(),
-                ),
-            }
+            },
+            Err(_) => HttpResponse::InternalServerError().body("Internal error"),
         }
-        _ => (config::constants::INTERNAL_ERROR.to_string(), "Internal error".to_string()),
-    }
+    })
+    .await
 }
 
-//handle get request
-pub fn handle_get_request(request: &str) -> (String, String) {
-    info!("request: {:?}", &request);
-    match (get_id(&request), Client::connect(config::DB_URL.as_str(), NoTls)) {
-        (Ok(id), Ok(mut client)) =>
-            match client.query_one("SELECT * FROM users WHERE id = $1", &[&id]) {
-                Ok(row) => {
-                    let user = User {
-                        id: row.get(0),
-                        name: row.get(1),
-                        email: row.get(2),
-                    };
-                    info!("User found: {:?}", user);
-                    (config::constants::OK_RESPONSE.to_string(), serde_json::to_string(&user).unwrap())
+pub async fn get_user_handler(user_id: web::Path<Uuid>) -> impl Responder {
+    with_db_connection(|client| async move {
+        match fetch_user_by_id(&client, *user_id).await {
+            Ok(user) => HttpResponse::Ok().json(user),
+            Err(_) => HttpResponse::NotFound().body("User not found"),
+        }
+    })
+    .await
+}
+
+pub async fn list_users_handler() -> impl Responder {
+    info!("list_users 中身");
+    with_db_connection(|client| async move {
+        match fetch_all_users(&client).await {
+            Ok(users) => HttpResponse::Ok().json(users),
+            Err(_) => HttpResponse::InternalServerError().body("Internal error"),
+        }
+    })
+    .await
+}
+
+pub async fn put_user_handler(user_id: web::Path<Uuid>, user: web::Json<User>) -> impl Responder {
+    with_db_connection(|client| async move {
+        match update_user(&client, &user.into_inner(), *user_id).await {
+            Ok(_) => HttpResponse::Ok().body("User updated"),
+            Err(_) => HttpResponse::InternalServerError().body("Internal error"),
+        }
+    })
+    .await
+}
+
+pub async fn delete_user_handler(user_id: web::Path<Uuid>) -> impl Responder {
+    with_db_connection(|client| async move {
+        match delete_user(&client, *user_id).await {
+            Ok(rows_affected) => {
+                if rows_affected == 0 {
+                    HttpResponse::NotFound().body("User not found")
+                } else {
+                    HttpResponse::Ok().body("User deleted")
                 }
-                _ => {
-                    warn!("Failed to fetch user:");
-                    (config::constants::NOT_FOUND.to_string(), "User not found".to_string())
+            }
+            Err(_) => HttpResponse::InternalServerError().body("Internal error"),
+        }
+    })
+    .await
+}
+
+async fn handle_connection_error(e: Error) -> HttpResponse {
+    error!("Failed to connect to database: {}", e);
+    HttpResponse::InternalServerError().body("Database connection failed")
+}
+
+pub async fn establish_connection() -> Result<(Client, Connection<Socket, NoTlsStream>), Error> {
+    debug!("Establishing connection with string: {}", &*config::DB_URL);
+    tokio_postgres::connect(&*config::DB_URL, NoTls).await
+}
+
+async fn with_db_connection<F, Fut>(f: F) -> impl Responder
+where
+    F: FnOnce(Client) -> Fut,
+    Fut: Future<Output = HttpResponse>,
+{
+    let connection_result = establish_connection().await;
+    match connection_result {
+        Ok((client, connection)) => {
+            actix_web::rt::spawn(async move {
+                if let Err(e) = connection.await {
+                    error!("Connection error: {}", e);
                 }
-            }
-
-        _ => (config::constants::INTERNAL_ERROR.to_string(), "Internal error".to_string()),
-    }
-}
-
-//handle get all request
-pub fn handle_get_all_request(_request: &str) -> (String, String) {
-    match Client::connect(config::DB_URL.as_str(), NoTls) {
-        Ok(mut client) => {
-            let mut users = Vec::new(); // Vector to store the users
-
-            for row in client.query("SELECT id, name, email FROM users", &[]).unwrap() {
-                users.push(User {
-                    id: row.get(0),
-                    name: row.get(1),
-                    email: row.get(2),
-                });
-            }
-
-            (config::constants::OK_RESPONSE.to_string(), serde_json::to_string(&users).unwrap())
+            });
+            f(client).await
         }
-        _ => (config::constants::INTERNAL_ERROR.to_string(), "Internal error".to_string()),
+        Err(e) => handle_connection_error(e).await,
     }
-}
-
-//handle put request
-pub fn handle_put_request(request: &str) -> (String, String) {
-    match
-        (
-            get_id(&request),
-            get_user_request_body(&request),
-            Client::connect(config::DB_URL.as_str(), NoTls),
-        )
-    {
-        (Ok(id), Ok(user), Ok(mut client)) => {
-            client
-                .execute(
-                    "UPDATE users SET name = $1, email = $2 WHERE id = $3",
-                    &[&user.name, &user.email, &id]
-                )
-                .unwrap();
-
-            (config::constants::OK_RESPONSE.to_string(), "User updated".to_string())
-        }
-        _ => (config::constants::INTERNAL_ERROR.to_string(), "Internal error".to_string()),
-    }
-}
-
-//handle delete request
-pub fn handle_delete_request(request: &str) -> (String, String) {
-    match (get_id(&request), Client::connect(config::DB_URL.as_str(), NoTls)) {
-        (Ok(id), Ok(mut client)) => {
-            let rows_affected = client.execute("DELETE FROM users WHERE id = $1", &[&id]).unwrap();
-
-            //if rows affected is 0, user not found
-            if rows_affected == 0 {
-                return (config::constants::NOT_FOUND.to_string(), "User not found".to_string());
-            }
-
-            (config::constants::OK_RESPONSE.to_string(), "User deleted".to_string())
-        }
-        _ => (config::constants::INTERNAL_ERROR.to_string(), "Internal error".to_string()),
-    }
-}
-
-
-fn get_id(request: &str) -> Result<Uuid, String> {
-    info!("request: {}", request);
-    let maybe_id = request
-        .split("/")
-        .nth(4)
-        .unwrap_or_default()
-        .split_whitespace()
-        .next()
-        .unwrap_or_default();
-
-    Uuid::parse_str(maybe_id)
-        .map_err(|_| "Failed to parse UUID from request".to_string())
 }

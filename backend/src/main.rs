@@ -1,27 +1,25 @@
-mod routes;
-mod handlers;
-mod db;
-mod models;
-mod config;
-use std::env;
-use std::net::TcpListener;
+use actix_web::{App, HttpServer};
+use dotenv::dotenv;
+use env_logger::init;
 use log::info;
+use std::env;
 
-fn main() {
-    env::set_var("RUST_LOG", "debug");
-    env_logger::init();
+mod config;
+mod db;
+mod handlers;
+mod models;
+mod routes;
 
-    let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
-    info!("Server: {:?}", listener);
-
-    for stream in listener.incoming() {
-        match stream {
-            Ok(stream) => {
-                routes::handle_client(stream);
-            }
-            Err(e) => {
-                eprintln!("Unable to handle incoming connection: {}", e);
-            }
-        }
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    dotenv().ok();
+    if env::var("RUST_LOG").is_err() {
+        env::set_var("RUST_LOG", "debug");
     }
+    init();
+    let server =
+        HttpServer::new(|| App::new().configure(routes::handle_config)).bind("0.0.0.0:8080")?;
+
+    info!("サーバーが起動しました。ポート 8080 で待機中...");
+    server.run().await
 }

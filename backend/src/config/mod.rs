@@ -1,7 +1,7 @@
 pub mod constants;
+use dotenv::dotenv;
 use lazy_static::lazy_static;
 use std::env;
-use dotenv::dotenv;
 
 lazy_static! {
     pub static ref DB_URL: String = {
