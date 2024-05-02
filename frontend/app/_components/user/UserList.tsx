@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import { ExistingUserListProps, isExistingUser } from "@/definitions";
 import CardComponent from "@/_components/CardComponent";

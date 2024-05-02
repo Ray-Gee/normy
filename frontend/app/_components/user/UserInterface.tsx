@@ -1,27 +1,27 @@
 "use client";
+import { useQuery } from "@tanstack/react-query";
 import React, { useState, useEffect } from "react";
+import { Container, Title } from "@mantine/core";
 import { CreateForm } from "@/_components/user/CreateForm";
 import { UserList } from "@/_components/user/UserList";
 import type { UserInterfaceProps, ExistingUser } from "@/definitions";
 import { listUsers } from "@/_services/userService";
-import { Container, Title } from "@mantine/core";
 import { T } from "@/_intl/T";
 
 const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
   const [users, setUsers] = useState<ExistingUser[]>([]);
-
+  const { data, error, isLoading } = useQuery<ExistingUser[], Error>({
+    queryKey: ["users", backendName],
+    queryFn: () => listUsers(),
+  });
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data: ExistingUser[] = await listUsers();
-        setUsers(data.reverse());
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+    if (data) {
+      setUsers([...data].reverse());
+    }
+  }, [data]);
 
-    fetchData();
-  }, [backendName]);
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error fetching users: {error.message}</div>;
 
   return (
     <Container
@@ -30,8 +30,8 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
       <Title>
         <T id="Users" />
       </Title>
-      <CreateForm items={users} setItems={setUsers} />
-      <UserList items={users} setItems={setUsers} />
+      <CreateForm items={users || []} setItems={setUsers} />
+      <UserList items={users || []} setItems={setUsers} />
     </Container>
   );
 };
