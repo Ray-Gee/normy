@@ -2,6 +2,7 @@ use crate::models::User;
 use log::info;
 use tokio_postgres::{Client, Error};
 use uuid::Uuid;
+pub mod connections;
 
 pub async fn create_user(client: &Client, user: &User) -> Result<Uuid, Error> {
     let user_id = Uuid::new_v4();
