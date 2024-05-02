@@ -1,3 +1,4 @@
+use crate::db::connections::with_db_connection;
 use crate::db::{
     create_user, delete_user, fetch_all_users, fetch_user, fetch_user_by_id, update_user,
 };
@@ -5,7 +6,6 @@ use crate::models::User;
 use actix_web::{web, HttpResponse, Responder};
 use log::info;
 use uuid::Uuid;
-use crate::db::connections::with_db_connection;
 
 pub async fn post_user_handler(user: web::Json<User>) -> impl Responder {
     with_db_connection(|client| async move {

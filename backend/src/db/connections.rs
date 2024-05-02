@@ -1,8 +1,8 @@
 use crate::config;
+use actix_web::{HttpResponse, Responder};
 use log::{debug, error};
 use std::future::Future;
 use tokio_postgres::{tls::NoTlsStream, Client, Connection, Error, NoTls, Socket};
-use actix_web::{HttpResponse, Responder};
 
 async fn handle_connection_error(e: Error) -> HttpResponse {
     error!("Failed to connect to database: {}", e);
