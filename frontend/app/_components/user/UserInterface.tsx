@@ -1,19 +1,15 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
 import React, { useState, useEffect } from "react";
 import { Container, Title } from "@mantine/core";
 import { CreateForm } from "@/_components/user/CreateForm";
 import { UserList } from "@/_components/user/UserList";
+import { useListUsers } from "@/_utils/_hooks/users";
 import type { UserInterfaceProps, ExistingUser } from "@/definitions";
-import { listUsers } from "@/_services/userService";
 import { T } from "@/_intl/T";
 
 const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
   const [users, setUsers] = useState<ExistingUser[]>([]);
-  const { data, error, isLoading } = useQuery<ExistingUser[], Error>({
-    queryKey: ["users", backendName],
-    queryFn: () => listUsers(),
-  });
+  const { data, error, isLoading } = useListUsers({ backendName });
   useEffect(() => {
     if (data) {
       setUsers([...data].reverse());
