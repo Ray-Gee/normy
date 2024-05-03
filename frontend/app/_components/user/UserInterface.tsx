@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Container, Title, LoadingOverlay, Alert } from "@mantine/core";
+import { Container, Title, LoadingOverlay } from "@mantine/core";
 import { ErrorAlert } from "@/_components/ErrorAlert";
 import { CreateForm } from "@/_components/user/CreateForm";
 import { UserList } from "@/_components/user/UserList";

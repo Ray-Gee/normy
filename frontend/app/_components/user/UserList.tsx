@@ -4,30 +4,29 @@ import { ExistingUserListProps, isExistingUser } from "@/definitions";
 import CardComponent from "@/_components/CardComponent";
 import { DeleteConfirmation } from "@/_components/DeleteConfirmation";
 import { T } from "@/_intl/T";
-import { Button, Card, Flex } from "@mantine/core";
+import { Button, Card, Flex, LoadingOverlay } from "@mantine/core";
 import { useNotification } from "@/_utils/_hooks/notifications";
-import { deleteWrapper, deleteUser } from "@/_services/userService";
+import { useDeleteUser } from "@/_utils/_hooks/users";
 
 export const UserList: React.FC<ExistingUserListProps> = ({
   items,
   setItems,
 }) => {
   const [modalUserId, setModalUserId] = useState<string>("");
-  const { notifySuccess } = useNotification();
+  const { notifySuccess, notifyError } = useNotification();
 
-  const handleDelete = async (userId: string) => {
-    const user = items.find((u) => u.id === userId);
-    if (user) {
-      await deleteWrapper({
-        item: user,
-        items,
-        setItems,
-        deleteData: deleteUser,
-      });
+  const { mutateAsync, isPending } = useDeleteUser({
+    items,
+    setItems,
+    onSuccess: () => {
       setModalUserId("");
       notifySuccess("削除されました。");
-    }
-  };
+    },
+    onError: (error: unknown) => {
+      notifyError({ error });
+    },
+  });
+  if (isPending) return <LoadingOverlay visible={true} />;
 
   const handleClose = () => {
     setModalUserId("");
@@ -45,7 +44,7 @@ export const UserList: React.FC<ExistingUserListProps> = ({
           </Flex>
           {modalUserId === user.id && (
             <DeleteConfirmation
-              onDelete={() => handleDelete(user.id)}
+              onDelete={() => mutateAsync(user.id)}
               onClose={handleClose}
             />
           )}

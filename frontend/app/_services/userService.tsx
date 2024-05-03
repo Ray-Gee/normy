@@ -11,7 +11,6 @@ async function apiRequest<T>(
   url: string,
   data?: any
 ): Promise<T> {
-  console.log("data:", data);
   try {
     const response = await axios({ method, url, data });
     return response.data;

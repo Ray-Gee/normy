@@ -26,6 +26,10 @@ export interface Card {
   email: string;
 }
 
+export interface UserProps {
+  user: ExistingUser;
+}
+
 export interface UserInterfaceProps {
   backendName: string;
 }
@@ -45,4 +49,22 @@ export interface NavItem {
   link?: string;
   initiallyOpened?: boolean;
   links?: { label: string; link: string }[];
+}
+
+export interface UseUserProps {
+  items: ExistingUser[];
+  setItems: (users: ExistingUser[]) => void;
+  onSuccess: () => void;
+  onError: (error: Error) => void;
+}
+
+export interface UseDeleteUserProps extends ItemProps<ExistingUser> {
+  onSuccess: () => void;
+  onError: (error: Error) => void;
+}
+
+export interface UseUpdateUserProps {
+  user: ExistingUser;
+  onSuccess: () => void;
+  onError: (error: Error) => void;
 }

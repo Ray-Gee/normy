@@ -1,40 +1,35 @@
 import React from "react";
-import { createWrapper, createUser } from "@/_services/userService";
-import type {
-  NewUser,
-  ExistingUserListProps,
-  ExistingUser,
-} from "@/definitions";
-import { Button, TextInput, Flex } from "@mantine/core";
+import type { NewUser, ExistingUserListProps } from "@/definitions";
+import { Button, TextInput, Flex, LoadingOverlay } from "@mantine/core";
 import { UserForm } from "@/_utils/UserForm";
 import { T } from "@/_intl/T";
 import { useNotification } from "@/_utils/_hooks/notifications";
+import { useCreateUser } from "@/_utils/_hooks/users";
 
 export const CreateForm: React.FC<ExistingUserListProps> = ({
   items,
   setItems,
 }) => {
   const { notifySuccess, notifyError } = useNotification();
-
   const form = UserForm({
     name: "",
     email: "",
   });
+  const { mutate, isPending } = useCreateUser({
+    items,
+    setItems,
+    onSuccess: () => {
+      form.reset();
+      notifySuccess();
+    },
+    onError: (error: unknown) => {
+      notifyError({ error });
+    },
+  });
+  if (isPending) return <LoadingOverlay visible={true} />;
 
   const handleSubmit = async (values: NewUser) => {
-    try {
-      await createWrapper<ExistingUser, NewUser>({
-        values,
-        items,
-        setItems,
-        createData: createUser,
-      });
-      notifySuccess();
-      form.reset();
-    } catch (error) {
-      console.error("Error creating user:", error);
-      notifyError();
-    }
+    mutate({ values });
   };
 
   return (
