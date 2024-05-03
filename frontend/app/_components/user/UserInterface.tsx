@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Container, Title } from "@mantine/core";
+import { Container, Title, LoadingOverlay, Alert } from "@mantine/core";
+import { ErrorAlert } from "@/_components/ErrorAlert";
 import { CreateForm } from "@/_components/user/CreateForm";
 import { UserList } from "@/_components/user/UserList";
 import { useListUsers } from "@/_utils/_hooks/users";
@@ -16,8 +17,8 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
     }
   }, [data]);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error fetching users: {error.message}</div>;
+  if (isLoading) return <LoadingOverlay visible={true} />;
+  if (error) return <ErrorAlert message={error.message} />;
 
   return (
     <Container
