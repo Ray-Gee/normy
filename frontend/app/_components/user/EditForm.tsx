@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import type { ExistingUser, UserProps } from "@/definitions";
+import type { UserProps } from "@/definitions";
 import {
   Container,
   Alert,
@@ -74,12 +74,12 @@ export const EditUserForm: React.FC<UserProps> = ({ user }) => {
                 <SimpleGrid cols={1}>
                   <TextInput
                     {...form.getInputProps("name")}
-                    withAsterisk
+                    required
                     label={<T id="Username" />}
                   />
                   <TextInput
                     {...form.getInputProps("email")}
-                    withAsterisk
+                    required
                     label={<T id="Email" />}
                     placeholder="sample@sample.com"
                   />

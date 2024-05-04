@@ -6,6 +6,7 @@ import {
   updateUser,
   deleteUser,
   deleteWrapper,
+  createDataItem,
 } from "@/_services/userService";
 import type {
   NewUser,
@@ -13,6 +14,7 @@ import type {
   UseUserProps,
   UseUpdateUserProps,
   UseDeleteUserProps,
+  ResultProps,
 } from "@/definitions";
 
 export const useListUsers = ({ backendName }: { backendName: String }) => {
@@ -25,16 +27,41 @@ export const useListUsers = ({ backendName }: { backendName: String }) => {
 export const useCreateUser = ({
   items,
   setItems,
-  onError,
   onSuccess,
+  onError,
 }: UseUserProps) => {
   const queryClient = useQueryClient();
 
   const mutationFn = async ({ values }: { values: NewUser }) => {
     return createWrapper<ExistingUser, NewUser>({
-      values,
       items,
       setItems,
+      values,
+      createData: createUser,
+    });
+  };
+
+  return useMutation({
+    mutationKey: ["createUser"],
+    mutationFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["users"],
+      });
+      onSuccess();
+    },
+    onError: (error: Error) => {
+      onError(error);
+    },
+  });
+};
+
+export const useCreateSignupUser = ({ onSuccess, onError }: ResultProps) => {
+  const queryClient = useQueryClient();
+
+  const mutationFn = async ({ values }: { values: NewUser }) => {
+    return createDataItem<ExistingUser, NewUser>({
+      values,
       createData: createUser,
     });
   };

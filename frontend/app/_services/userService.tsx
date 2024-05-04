@@ -49,14 +49,14 @@ export const createUser = async (user: NewUser): Promise<ExistingUser> => {
 };
 
 export const createWrapper = async <T, U>({
-  values,
   items,
   setItems,
+  values,
   createData,
 }: {
-  values: U;
   items: T[];
   setItems: (items: T[]) => void;
+  values: U;
   createData: (item: U) => Promise<T>;
 }): Promise<void> => {
   console.log("values:", values);
@@ -66,6 +66,23 @@ export const createWrapper = async <T, U>({
   } catch (error) {
     console.error("Error creating item:", error);
     throw new Error("error createWrapper");
+  }
+};
+
+export const createDataItem = async <T, U>({
+  values,
+  createData,
+}: {
+  values: U;
+  createData: (item: U) => Promise<T>;
+}): Promise<T> => {
+  console.log("values:", values);
+  try {
+    const createdItem = await createData(values);
+    return createdItem;
+  } catch (error) {
+    console.error("Error creating item:", error);
+    throw new Error("Error in createDataItem");
   }
 };
 

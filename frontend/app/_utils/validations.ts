@@ -1,3 +1,5 @@
+import { error } from "console";
+
 export const validateName = (value: string) => {
   return value ? null : "Name is required";
 };
@@ -6,7 +8,7 @@ export const validateEmail = (value: string) => {
   return /^\S+@\S+\.\S+$/.test(value) ? null : "Invalid email format";
 };
 
-export const validatePassword = (password: string): string[] => {
+export const validatePassword = (password: string): string[] | null => {
   const errors: string[] = [];
 
   if (password.length < 8) {
@@ -25,5 +27,5 @@ export const validatePassword = (password: string): string[] => {
   //   errors.push("Password must contain at least one special character.");
   // }
 
-  return errors;
+  return errors.length > 0 ? errors : null;
 };

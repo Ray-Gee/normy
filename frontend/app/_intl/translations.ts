@@ -2,6 +2,7 @@ export const translations = {
   en: {
     Users: "Users",
     Username: "Username",
+    Name: "Name",
     Submit: "Submit",
     Email: "Email",
     Create: "Create",
@@ -10,13 +11,14 @@ export const translations = {
     Alert: "Alert",
     Valid: "Valid",
     "Are you sure you want to delete?": "Are you sure you want to delete?",
-    "Cancel": "Cancel",
+    Cancel: "Cancel",
     "Yes, Delete": "Yes, Delete",
   },
   ja: {
     Users: "ユーザー一覧",
     "Users.edit": "ユーザー編集",
     Username: "名前",
+    Name: "名前",
     Submit: "送信",
     Email: "メール",
     Create: "新規作成",
@@ -25,7 +27,7 @@ export const translations = {
     Alert: "あらーとだみー",
     Valid: "有効",
     "Are you sure you want to delete?": "本当に削除しますか？",
-    "Cancel": "キャンセル",
+    Cancel: "キャンセル",
     "Yes, Delete": "はい、削除します",
   },
-}
+};

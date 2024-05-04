@@ -1,17 +1,31 @@
-import React from "react"
-import Link from "next/link"
-import { Card } from "../definitions"
+import React from "react";
+import Link from "next/link";
+import { CardProps } from "@/definitions";
+import { Card, Text } from "@mantine/core";
+import { T } from "@/_intl/T";
 
-const CardComponent: React.FC<{ card: Card }> = ({ card }) => {
+const CardComponent: React.FC<{ card: CardProps }> = ({ card }) => {
   return (
     <Link href={`/users/edit/${card.id}`} passHref>
-      <div className="bg-white shadow-lg rounded-lg p-2 mb-2 hover:bg-gray-100 cursor-pointer">
-        <div className="text-sm text-gray-600">ID: {card.id}</div>
-        <div className="text-lg font-semibold text-gray-800">{card.name}</div>
-        <div className="text-md text-gray-700">{card.email}</div>
-      </div>
+      <Card
+        shadow="sm"
+        p="md"
+        component="a"
+        style={{ textDecoration: "none" }}
+        className="mb-2 hover:bg-gray-100 cursor-pointer"
+      >
+        {/* <Text size="sm" color="dimmed">
+          {<T id="ID" />}:{card.id}
+        </Text> */}
+        <Text size="lg">
+          {<T id="Name" />}: {card.name}
+        </Text>
+        <Text size="md">
+          {<T id="Email" />}: {card.email}
+        </Text>
+      </Card>
     </Link>
-  )
-}
+  );
+};
 
-export default CardComponent
+export default CardComponent;

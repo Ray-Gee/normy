@@ -4,6 +4,7 @@ import * as react from "react";
 export interface BaseUser {
   name: string;
   email: string;
+  password?: string;
 }
 
 export interface NewUser extends BaseUser {
@@ -20,7 +21,7 @@ export function isExistingUser(user: User): user is ExistingUser {
   return typeof user.id === "string";
 }
 
-export interface Card {
+export interface CardProps {
   id: string;
   name: string;
   email: string;
@@ -51,20 +52,26 @@ export interface NavItem {
   links?: { label: string; link: string }[];
 }
 
-export interface UseUserProps {
+export interface UseUserProps extends ResultProps {
   items: ExistingUser[];
   setItems: (users: ExistingUser[]) => void;
+}
+
+export interface UseDeleteUserProps
+  extends ItemProps<ExistingUser>,
+    ResultProps {}
+
+export interface ResultProps {
   onSuccess: () => void;
   onError: (error: Error) => void;
 }
 
-export interface UseDeleteUserProps extends ItemProps<ExistingUser> {
-  onSuccess: () => void;
-  onError: (error: Error) => void;
-}
-
-export interface UseUpdateUserProps {
+export interface UseUpdateUserProps extends ResultProps {
   user: ExistingUser;
-  onSuccess: () => void;
-  onError: (error: Error) => void;
+}
+
+export interface ValidationRules {
+  name: (value: string) => string | null;
+  email: (value: string) => string | null;
+  password?: (value: string) => string[] | null;
 }

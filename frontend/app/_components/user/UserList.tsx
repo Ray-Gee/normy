@@ -38,7 +38,10 @@ export const UserList: React.FC<ExistingUserListProps> = ({
         <Card key={user.id}>
           {isExistingUser(user) ? <CardComponent card={user} /> : <div></div>}
           <Flex justify="flex-end">
-            <Button onClick={() => setModalUserId(user.id)}>
+            <Button
+              onClick={() => setModalUserId(user.id)}
+              style={{ margin: "10px" }}
+            >
               <T id="Delete" />
             </Button>
           </Flex>
