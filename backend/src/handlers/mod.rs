@@ -2,21 +2,34 @@ use crate::db::connections::with_db_connection;
 use crate::db::{
     create_user, delete_user, fetch_all_users, fetch_user, fetch_user_by_id, update_user,
 };
+use crate::email;
 use crate::models::User;
 use actix_web::{web, HttpResponse, Responder};
-use log::info;
+use log::{info, error};
 use uuid::Uuid;
 
 pub async fn post_user_handler(user: web::Json<User>) -> impl Responder {
     with_db_connection(|client| async move {
+        match email::client::send_email(&user.email.as_str(), "test", "test body").await {
+            Ok(_) => info!("Sent successfully!"),
+            Err(e) => error!("Failed to send: {:?}", e),
+        };
+
         match create_user(&client, &user.into_inner()).await {
-            Ok(user_id) => match fetch_user(&client, user_id).await {
-                Ok(user) => HttpResponse::Ok().json(user),
-                Err(_) => {
-                    HttpResponse::InternalServerError().body("Failed to retrieve created user")
+            Ok(user_id) => {
+                info!("User created with ID: {}", user_id);
+                match fetch_user(&client, user_id).await {
+                    Ok(user) => HttpResponse::Ok().json(user),
+                    Err(e) => {
+                        error!("Failed to retrieve user: {:?}", e);
+                        HttpResponse::InternalServerError().body("Failed to retrieve created user")
+                    }
                 }
-            },
-            Err(_) => HttpResponse::InternalServerError().body("Internal error"),
+            }
+            Err(e) => {
+                error!("Failed to create user: {:?}", e);
+                HttpResponse::InternalServerError().body("Internal error during user creation")
+            }
         }
     })
     .await

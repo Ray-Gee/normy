@@ -1,11 +1,10 @@
 pub mod constants;
-use dotenv::dotenv;
 use lazy_static::lazy_static;
 use std::env;
 
 lazy_static! {
     pub static ref DB_URL: String = {
-        dotenv().ok();
+        let path = env::current_dir().unwrap();
         format!(
             "postgres://{}:{}@db:5432/{}",
             env::var("POSTGRES_USER").expect("POSTGRES_USER must be set"),

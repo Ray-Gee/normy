@@ -65,7 +65,6 @@ export const useCreateSignupUser = ({ onSuccess, onError }: ResultProps) => {
       createData: createUser,
     });
   };
-
   return useMutation({
     mutationKey: ["createUser"],
     mutationFn,

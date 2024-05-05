@@ -6,6 +6,7 @@ use std::env;
 
 mod config;
 mod db;
+mod email;
 mod handlers;
 mod models;
 mod routes;

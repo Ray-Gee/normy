@@ -49,11 +49,11 @@ export function DashboardLayout({ children }: Props) {
         />
       </AppShell.Header>
       <AppShell.Main bg={bg}>{children}</AppShell.Main>
-      <AppShell.Footer>
+      {/* <AppShell.Footer>
         <Text w="full" size="sm" c="gray">
           CopyRight © 2023 Ueda
         </Text>
-      </AppShell.Footer>
+      </AppShell.Footer> */}
     </AppShell>
   );
 }

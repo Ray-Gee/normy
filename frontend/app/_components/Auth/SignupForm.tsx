@@ -8,10 +8,12 @@ import {
   Space,
   TextInput,
   LoadingOverlay,
+  Title,
 } from "@mantine/core";
 import { UserAuthForm } from "@/_utils/UserForm";
 import { useNotification } from "@/_utils/_hooks/notifications";
 import { useCreateSignupUser } from "@/_utils/_hooks/users";
+import { T } from "@/_intl/T";
 
 export default function SignupForm() {
   const router = useRouter();
@@ -38,24 +40,30 @@ export default function SignupForm() {
 
   return (
     <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+      <Title order={2}>
+        <T id="Signup" />
+      </Title>
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <TextInput {...form.getInputProps("name")} label="Name" required />
+        <TextInput
+          {...form.getInputProps("name")}
+          label={<T id="Name" />}
+          required
+        />
         <TextInput
           {...form.getInputProps("email")}
-          label="Email"
+          label={<T id="Email" />}
           placeholder="sample@sample.com"
           required
         />
         <PasswordInput
           {...form.getInputProps("password")}
-          label="Password"
+          label={<T id="Password" />}
           placeholder="Your password"
           required
-          mt="md"
         />
         <Space h="md" />
         <Button fullWidth mt="xl" type="submit">
-          Sign Up
+          <T id="Sign Up" />
         </Button>
       </form>
     </Paper>
