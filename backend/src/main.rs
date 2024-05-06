@@ -4,6 +4,7 @@ use env_logger::init;
 use log::info;
 use std::env;
 
+mod auth;
 mod config;
 mod db;
 mod email;

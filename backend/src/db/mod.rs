@@ -1,4 +1,5 @@
 use crate::models::User;
+use actix_web::HttpResponse;
 use bcrypt::{hash, DEFAULT_COST};
 use log::{debug, error, info};
 use std::error::Error;
@@ -7,6 +8,22 @@ use uuid::Uuid;
 type DbError = tokio_postgres::Error;
 
 pub mod connections;
+
+pub async fn create_and_fetch_user(client: &Client, user: &User) -> Result<User, HttpResponse> {
+    match create_user(client, user).await {
+        Ok(user_id) => {
+            info!("User created with ID: {}", user_id);
+            fetch_user(client, user_id).await.map_err(|e| {
+                error!("Failed to retrieve user: {:?}", e);
+                HttpResponse::InternalServerError().body("Failed to retrieve created user")
+            })
+        }
+        Err(e) => {
+            error!("Failed to create user: {:?}", e);
+            Err(HttpResponse::InternalServerError().body("Internal error during user creation"))
+        }
+    }
+}
 
 pub async fn create_user(client: &Client, user: &User) -> Result<Uuid, Box<dyn Error>> {
     let hashed_password = match &user.password {
@@ -82,7 +99,7 @@ pub async fn fetch_all_users(client: &Client) -> Result<Vec<User>, DbError> {
             password: None,
         });
     }
-
+    debug!("users: {:?}", users);
     Ok(users)
 }
 

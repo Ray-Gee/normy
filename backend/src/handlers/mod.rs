@@ -1,35 +1,25 @@
-use crate::db::connections::with_db_connection;
 use crate::db::{
-    create_user, delete_user, fetch_all_users, fetch_user, fetch_user_by_id, update_user,
+    connections::with_db_connection, create_and_fetch_user, delete_user, fetch_all_users,
+    fetch_user_by_id, update_user,
 };
 use crate::email;
 use crate::models::User;
 use actix_web::{web, HttpResponse, Responder};
-use log::{info, error};
+use log::{error, info};
 use uuid::Uuid;
 
 pub async fn post_user_handler(user: web::Json<User>) -> impl Responder {
     with_db_connection(|client| async move {
-        match email::client::send_email(&user.email.as_str(), "test", "test body").await {
-            Ok(_) => info!("Sent successfully!"),
-            Err(e) => error!("Failed to send: {:?}", e),
-        };
-
-        match create_user(&client, &user.into_inner()).await {
-            Ok(user_id) => {
-                info!("User created with ID: {}", user_id);
-                match fetch_user(&client, user_id).await {
-                    Ok(user) => HttpResponse::Ok().json(user),
-                    Err(e) => {
-                        error!("Failed to retrieve user: {:?}", e);
-                        HttpResponse::InternalServerError().body("Failed to retrieve created user")
-                    }
+        let user = user.into_inner();
+        match create_and_fetch_user(&client, &user).await {
+            Ok(created_user) => {
+                if let Err(_) = email::client::send_confirmation_email(&created_user).await {
+                    return HttpResponse::InternalServerError()
+                        .body("Failed to send confirmation email");
                 }
+                HttpResponse::Ok().json(created_user)
             }
-            Err(e) => {
-                error!("Failed to create user: {:?}", e);
-                HttpResponse::InternalServerError().body("Internal error during user creation")
-            }
+            Err(response) => response,
         }
     })
     .await
@@ -39,7 +29,10 @@ pub async fn get_user_handler(user_id: web::Path<Uuid>) -> impl Responder {
     with_db_connection(|client| async move {
         match fetch_user_by_id(&client, *user_id).await {
             Ok(user) => HttpResponse::Ok().json(user),
-            Err(_) => HttpResponse::NotFound().body("User not found"),
+            Err(e) => {
+                error!("Failed in get_user_handler: {:?}", e);
+                HttpResponse::NotFound().body("User not found")
+            }
         }
     })
     .await
@@ -50,7 +43,10 @@ pub async fn list_users_handler() -> impl Responder {
     with_db_connection(|client| async move {
         match fetch_all_users(&client).await {
             Ok(users) => HttpResponse::Ok().json(users),
-            Err(_) => HttpResponse::InternalServerError().body("Internal error"),
+            Err(e) => {
+                error!("Failed in list_users_handler: {:?}", e);
+                HttpResponse::InternalServerError().body("Internal error")
+            }
         }
     })
     .await
@@ -60,7 +56,10 @@ pub async fn put_user_handler(user_id: web::Path<Uuid>, user: web::Json<User>) -
     with_db_connection(|client| async move {
         match update_user(&client, &user.into_inner(), *user_id).await {
             Ok(_) => HttpResponse::Ok().body("User updated"),
-            Err(_) => HttpResponse::InternalServerError().body("Internal error"),
+            Err(e) => {
+                error!("Failed in put_user_handler: {:?}", e);
+                HttpResponse::InternalServerError().body("Internal error")
+            }
         }
     })
     .await
@@ -76,7 +75,10 @@ pub async fn delete_user_handler(user_id: web::Path<Uuid>) -> impl Responder {
                     HttpResponse::Ok().body("User deleted")
                 }
             }
-            Err(_) => HttpResponse::InternalServerError().body("Internal error"),
+            Err(e) => {
+                error!("Failed in delete_user_handler: {:?}", e);
+                HttpResponse::InternalServerError().body("Internal error")
+            }
         }
     })
     .await

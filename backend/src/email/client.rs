@@ -1,4 +1,8 @@
+use crate::auth::token;
+use crate::config::constants;
+use crate::models::User;
 use lettre::{transport::smtp::authentication::Credentials, Message, SmtpTransport, Transport};
+use log::{debug, error, info};
 use std::env;
 
 pub async fn send_email(
@@ -27,5 +31,31 @@ pub async fn send_email(
     match mailer.send(&email) {
         Ok(_) => Ok(()),
         Err(e) => Err(e),
+    }
+}
+
+pub async fn send_confirmation_email(user: &User) -> Result<(), String> {
+    let link = match user.id {
+        Some(user_id) => Some(token::generate_confirmation_link(&user_id.to_string())),
+        None => {
+            error!("Expected a UUID but found None");
+            return Err("No UUID found for user.".to_string());
+        }
+    };
+    let message = constants::generate_message(
+        &user.name,
+        constants::COMPNAY_NAME,
+        &*link.expect("Expected Option<String>"),
+    );
+    debug!("message: {:?}", message);
+    match send_email(&user.email.as_str(), constants::SUBJECT, &message).await {
+        Ok(_) => {
+            info!("Sent successfully!");
+            Ok(())
+        }
+        Err(e) => {
+            error!("Failed to send: {:?}", e);
+            Err("Failed to send email.".to_string())
+        }
     }
 }

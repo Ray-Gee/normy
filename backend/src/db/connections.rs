@@ -10,7 +10,7 @@ async fn handle_connection_error(e: Error) -> HttpResponse {
 }
 
 async fn establish_connection() -> Result<(Client, Connection<Socket, NoTlsStream>), Error> {
-    debug!("Establishing connection with string: {}", &*config::DB_URL);
+    debug!("Establishing connection with: {}", &*config::DB_URL);
     tokio_postgres::connect(&*config::DB_URL, NoTls).await
 }
 
