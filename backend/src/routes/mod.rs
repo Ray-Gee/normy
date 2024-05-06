@@ -18,6 +18,7 @@ pub fn handle_config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api/rust")
             .wrap(cors)
+            .service(web::resource("/confirm").route(web::post().to(handlers::post_auth_confirm)))
             .service(
                 web::resource("/users")
                     .route(web::get().to(handlers::list_users_handler))

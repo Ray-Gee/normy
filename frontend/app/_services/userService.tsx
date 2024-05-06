@@ -1,5 +1,5 @@
-import axios from "axios";
-import { API_ENDPOINTS } from "@/_api/endPoints";
+import { Method } from "axios";
+import api, { API_ENDPOINTS } from "@/_routes/api";
 import type { NewUser, User, ExistingUser } from "@/definitions";
 
 interface withId {
@@ -7,12 +7,20 @@ interface withId {
 }
 
 async function apiRequest<T>(
-  method: "get" | "post" | "put" | "delete",
+  method: Method,
   url: string,
   data?: any
 ): Promise<T> {
   try {
-    const response = await axios({ method, url, data });
+    const config = {
+      method: method,
+      url: url,
+      ...(method === "GET" || method === "DELETE"
+        ? { params: data }
+        : { data }),
+    };
+    const response = await api(config);
+    console.log("response:", response);
     return response.data;
   } catch (error) {
     console.error("Error api request:", error);

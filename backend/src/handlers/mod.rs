@@ -6,6 +6,7 @@ use crate::email;
 use crate::models::User;
 use actix_web::{web, HttpResponse, Responder};
 use log::{error, info};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 pub async fn post_user_handler(user: web::Json<User>) -> impl Responder {
@@ -82,4 +83,44 @@ pub async fn delete_user_handler(user_id: web::Path<Uuid>) -> impl Responder {
         }
     })
     .await
+}
+
+#[derive(Deserialize, Debug)]
+pub struct AuthConfirmParams {
+    user_id: String,
+    token: String,
+}
+
+#[derive(Serialize)]
+struct ApiResponse {
+    status: &'static str,
+    message: &'static str,
+}
+
+async fn verify_credentials(_token: &str, _user_id: &str) -> bool {
+    // ここでデータベースを呼び出し、トークンとユーザーIDが一致するか確認します
+    // 以下は仮のコードです
+    // 実際には、データベースへの問い合わせやトークンの検証ロジックを実装する必要があります
+    true // 仮の返り値
+}
+
+pub async fn post_auth_confirm(params: web::Json<AuthConfirmParams>) -> impl Responder {
+    info!(
+        "Received: token = {}, user_id = {}",
+        params.token, params.user_id
+    );
+
+    if verify_credentials(&params.token, &params.user_id).await {
+        let response = ApiResponse {
+            status: "success",
+            message: "Authentication successful",
+        };
+        HttpResponse::Ok().json(response)
+    } else {
+        let response = ApiResponse {
+            status: "error",
+            message: "Authentication failed",
+        };
+        HttpResponse::BadRequest().json(response)
+    }
 }

@@ -11,6 +11,7 @@ import { T } from "@/_intl/T";
 const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
   const [users, setUsers] = useState<ExistingUser[]>([]);
   const { data, error, isLoading } = useListUsers({ backendName });
+  console.log("data:", data);
   useEffect(() => {
     if (data) {
       setUsers([...data].reverse());

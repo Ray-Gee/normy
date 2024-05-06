@@ -75,3 +75,8 @@ export interface ValidationRules {
   email: (value: string) => string | null;
   password?: (value: string) => string[] | null;
 }
+
+export interface QueryProps {
+  token: string;
+  userId: string;
+}

@@ -1,6 +1,6 @@
-import { listUsers } from "@/_services/userService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  listUsers,
   createWrapper,
   createUser,
   updateUser,
