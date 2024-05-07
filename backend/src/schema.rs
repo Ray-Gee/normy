@@ -5,6 +5,8 @@ diesel::table! {
         id -> Uuid,
         user_id -> Uuid,
         token -> Varchar,
+        #[max_length = 50]
+        token_type -> Varchar,
         created_at -> Timestamp,
         expires_at -> Timestamp,
     }
@@ -18,6 +20,7 @@ diesel::table! {
         #[max_length = 255]
         email -> Varchar,
         password -> Varchar,
+        activated_at -> Nullable<Timestamp>,
         created_at -> Timestamp,
     }
 }

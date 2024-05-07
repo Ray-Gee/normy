@@ -25,6 +25,32 @@ pub async fn create_and_fetch_user(client: &Client, user: &User) -> Result<User,
     }
 }
 
+pub async fn create_token(
+    client: &Client,
+    user_id: &Uuid,
+    token: &str,
+    token_type: &str,
+    expires_at: chrono::NaiveDateTime,
+) -> Result<Uuid, Box<dyn Error>> {
+    debug!("Attempting to create token for user: {}", &user_id);
+
+    let query = "INSERT INTO user_tokens (user_id, token, token_type, expires_at) VALUES ($1, $2, $3, $4) RETURNING id";
+    match client
+        .query_one(query, &[&user_id, &token, &token_type, &expires_at])
+        .await
+    {
+        Ok(row) => {
+            let id: Uuid = row.get(0);
+            debug!("Token created with ID: {:?}", id);
+            Ok(id)
+        }
+        Err(e) => {
+            error!("Failed to create token: {:?}", e);
+            Err(Box::new(e))
+        }
+    }
+}
+
 pub async fn create_user(client: &Client, user: &User) -> Result<Uuid, Box<dyn Error>> {
     let hashed_password = match &user.password {
         Some(password) => hash(password, DEFAULT_COST).expect("Failed to hash password"),
@@ -72,10 +98,7 @@ pub async fn fetch_user(client: &Client, user_id: Uuid) -> Result<User, DbError>
     })
 }
 
-pub async fn fetch_user_by_id(
-    client: &tokio_postgres::Client,
-    user_id: Uuid,
-) -> Result<User, DbError> {
+pub async fn fetch_user_by_id(client: &Client, user_id: Uuid) -> Result<User, DbError> {
     let stmt = "SELECT id, name, email FROM users WHERE id = $1";
     client.query_one(stmt, &[&user_id]).await.map(|row| User {
         id: row.get(0),

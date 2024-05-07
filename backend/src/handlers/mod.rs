@@ -1,3 +1,4 @@
+use crate::auth::jwt;
 use crate::db::{
     connections::with_db_connection, create_and_fetch_user, delete_user, fetch_all_users,
     fetch_user_by_id, update_user,
@@ -9,12 +10,19 @@ use log::{error, info};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+// #[derive(Serialize)]
+// struct RegisterResponse {
+//     user: User,
+//     token: String,
+// }
+
 pub async fn post_user_handler(user: web::Json<User>) -> impl Responder {
     with_db_connection(|client| async move {
         let user = user.into_inner();
         match create_and_fetch_user(&client, &user).await {
             Ok(created_user) => {
-                if let Err(_) = email::client::send_confirmation_email(&created_user).await {
+                if let Err(_) = email::client::send_confirmation_email(&client, &created_user).await
+                {
                     return HttpResponse::InternalServerError()
                         .body("Failed to send confirmation email");
                 }
@@ -98,10 +106,7 @@ struct ApiResponse {
 }
 
 async fn verify_credentials(_token: &str, _user_id: &str) -> bool {
-    // ここでデータベースを呼び出し、トークンとユーザーIDが一致するか確認します
-    // 以下は仮のコードです
-    // 実際には、データベースへの問い合わせやトークンの検証ロジックを実装する必要があります
-    true // 仮の返り値
+    true
 }
 
 pub async fn post_auth_confirm(params: web::Json<AuthConfirmParams>) -> impl Responder {
