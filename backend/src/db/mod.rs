@@ -1,4 +1,4 @@
-use crate::models::User;
+use crate::types::User;
 use actix_web::HttpResponse;
 use bcrypt::{hash, DEFAULT_COST};
 use log::{debug, error, info};

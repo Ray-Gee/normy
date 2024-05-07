@@ -1,7 +1,7 @@
+use lazy_static::lazy_static;
 use once_cell::sync::Lazy;
+use std::env;
 
-// pub const OK_RESPONSE: &str = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, PUT, DELETE\r\nAccess-Control-Allow-Headers: Content-Type\r\n\r\n";
-// pub const NOT_FOUND: &str = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
 pub const COMPANY_NAME: &str = "Ueda Company";
 pub const SUBJECT: &str = "Confirm Your Registration";
 
@@ -21,4 +21,15 @@ pub fn generate_message(user_name: &str, company_name: &str, confirmation_link: 
         .replace("{{user_name}}", user_name)
         .replace("{{company_name}}", company_name)
         .replace("{{confirmation_link}}", confirmation_link)
+}
+
+lazy_static! {
+    pub static ref DB_URL: String = {
+        format!(
+            "postgres://{}:{}@localhost:5432/{}",
+            env::var("POSTGRES_USER").expect("POSTGRES_USER must be set"),
+            env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD must be set"),
+            env::var("POSTGRES_DB").expect("POSTGRES_DB must be set")
+        )
+    };
 }

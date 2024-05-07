@@ -1,8 +1,8 @@
 use crate::auth::token;
 use crate::config::constants;
 use crate::db;
-use crate::models::User;
-use chrono::Local;
+use crate::types::User;
+// use chrono::Local;
 use lettre::{transport::smtp::authentication::Credentials, Message, SmtpTransport, Transport};
 use log::{debug, error, info};
 use std::env;
@@ -65,7 +65,7 @@ pub async fn send_confirmation_email(client: &Client, user: &User) -> Result<(),
     debug!("Sending confirmation email: {:?}", message);
 
     // メール送信
-    match send_email(&user.email.to_string(), constants::SUBJECT, &message).await {
+    match send_email(user.email.as_str(), constants::SUBJECT, &message).await {
         Ok(_) => {
             info!("Confirmation email sent successfully!");
             Ok(())

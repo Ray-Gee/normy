@@ -1,34 +1,32 @@
-use crate::auth::jwt;
 use crate::db::{
     connections::with_db_connection, create_and_fetch_user, delete_user, fetch_all_users,
     fetch_user_by_id, update_user,
 };
 use crate::email;
-use crate::models::User;
+use crate::types::{ApiResponse, AuthConfirmParams, User};
 use actix_web::{web, HttpResponse, Responder};
 use log::{error, info};
-use serde::{Deserialize, Serialize};
+use serde_json::json;
 use uuid::Uuid;
-
-// #[derive(Serialize)]
-// struct RegisterResponse {
-//     user: User,
-//     token: String,
-// }
 
 pub async fn post_user_handler(user: web::Json<User>) -> impl Responder {
     with_db_connection(|client| async move {
-        let user = user.into_inner();
         match create_and_fetch_user(&client, &user).await {
             Ok(created_user) => {
-                if let Err(_) = email::client::send_confirmation_email(&client, &created_user).await
-                {
-                    return HttpResponse::InternalServerError()
-                        .body("Failed to send confirmation email");
+                match email::client::send_confirmation_email(&client, &created_user).await {
+                    Ok(_) => HttpResponse::Ok().json(created_user),
+                    Err(e) => {
+                        error!("Failed to send confirmation email: {}", e);
+                        HttpResponse::InternalServerError().json(json!({
+                            "error": "Failed to send confirmation email"
+                        }))
+                    }
                 }
-                HttpResponse::Ok().json(created_user)
             }
-            Err(response) => response,
+            Err(response) => {
+                error!("Failed to create or fetch user: {:?}", response);
+                response
+            }
         }
     })
     .await
@@ -93,18 +91,6 @@ pub async fn delete_user_handler(user_id: web::Path<Uuid>) -> impl Responder {
     .await
 }
 
-#[derive(Deserialize, Debug)]
-pub struct AuthConfirmParams {
-    user_id: String,
-    token: String,
-}
-
-#[derive(Serialize)]
-struct ApiResponse {
-    status: &'static str,
-    message: &'static str,
-}
-
 async fn verify_credentials(_token: &str, _user_id: &str) -> bool {
     true
 }
@@ -117,14 +103,14 @@ pub async fn post_auth_confirm(params: web::Json<AuthConfirmParams>) -> impl Res
 
     if verify_credentials(&params.token, &params.user_id).await {
         let response = ApiResponse {
-            status: "success",
-            message: "Authentication successful",
+            status: String::from("success"),
+            message: String::from("Authentication successful"),
         };
         HttpResponse::Ok().json(response)
     } else {
         let response = ApiResponse {
-            status: "error",
-            message: "Authentication failed",
+            status: String::from("error"),
+            message: String::from("Authentication failed"),
         };
         HttpResponse::BadRequest().json(response)
     }

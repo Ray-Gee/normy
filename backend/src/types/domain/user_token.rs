@@ -1,3 +1,6 @@
+use chrono::{DateTime, Utc};
+use uuid::Uuid;
+
 pub struct UserToken {
     pub user_id: Uuid,
     pub token: String,

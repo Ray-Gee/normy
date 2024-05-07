@@ -1,34 +1,16 @@
 use crate::handlers;
-use actix_cors::Cors;
 use actix_web::web;
 use log::info;
+mod users;
+mod configure;
 
 pub fn handle_config(cfg: &mut web::ServiceConfig) {
     info!("Configuring routes and CORS");
-    let cors = Cors::default()
-        .allowed_origin("http://localhost:3000")
-        .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
-        .allowed_headers(vec![
-            actix_web::http::header::AUTHORIZATION,
-            actix_web::http::header::ACCEPT,
-        ])
-        .allowed_header(actix_web::http::header::CONTENT_TYPE)
-        .max_age(3600);
-
+    let cors = configure::configure_cors();
     cfg.service(
         web::scope("/api/rust")
             .wrap(cors)
             .service(web::resource("/confirm").route(web::post().to(handlers::post_auth_confirm)))
-            .service(
-                web::resource("/users")
-                    .route(web::get().to(handlers::list_users_handler))
-                    .route(web::post().to(handlers::post_user_handler)),
-            )
-            .service(
-                web::resource("/users/{id}")
-                    .route(web::get().to(handlers::get_user_handler))
-                    .route(web::put().to(handlers::put_user_handler))
-                    .route(web::delete().to(handlers::delete_user_handler)),
-            ),
+            .service(web::scope("/users").configure(users::routes)),
     );
 }
