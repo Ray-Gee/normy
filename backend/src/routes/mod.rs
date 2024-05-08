@@ -1,8 +1,8 @@
 use crate::handlers;
 use actix_web::web;
 use log::info;
-mod users;
 mod configure;
+mod users;
 
 pub fn handle_config(cfg: &mut web::ServiceConfig) {
     info!("Configuring routes and CORS");

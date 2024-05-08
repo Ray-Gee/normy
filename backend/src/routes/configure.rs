@@ -1,4 +1,3 @@
-
 use actix_cors::Cors;
 
 pub fn configure_cors() -> Cors {

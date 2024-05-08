@@ -139,3 +139,19 @@ pub async fn delete_user(client: &Client, user_id: Uuid) -> Result<u64, DbError>
     let rows_affected = client.execute(statement, &[&user_id]).await?;
     Ok(rows_affected)
 }
+
+pub async fn fetch_token_is_valid(
+    client: &Client,
+    token: &str,
+    user_id: &Uuid,
+) -> Result<bool, DbError> {
+    info!("user_id: {:?}", user_id);
+    let stmt = "
+        SELECT EXISTS (
+            SELECT 1 FROM user_tokens
+            WHERE token = $1 AND user_id = $2 AND expires_at > NOW()
+        );
+    ";
+    let row = client.query_one(stmt, &[&token, &user_id]).await?;
+    Ok(row.get(0))
+}

@@ -1,6 +1,6 @@
 use crate::db::{
     connections::with_db_connection, create_and_fetch_user, delete_user, fetch_all_users,
-    fetch_user_by_id, update_user,
+    fetch_token_is_valid, fetch_user_by_id, update_user,
 };
 use crate::email;
 use crate::types::{ApiResponse, AuthConfirmParams, User};
@@ -91,27 +91,34 @@ pub async fn delete_user_handler(user_id: web::Path<Uuid>) -> impl Responder {
     .await
 }
 
-async fn verify_credentials(_token: &str, _user_id: &str) -> bool {
-    true
-}
-
 pub async fn post_auth_confirm(params: web::Json<AuthConfirmParams>) -> impl Responder {
     info!(
         "Received: token = {}, user_id = {}",
         params.token, params.user_id
     );
-
-    if verify_credentials(&params.token, &params.user_id).await {
-        let response = ApiResponse {
-            status: String::from("success"),
-            message: String::from("Authentication successful"),
-        };
-        HttpResponse::Ok().json(response)
-    } else {
-        let response = ApiResponse {
-            status: String::from("error"),
-            message: String::from("Authentication failed"),
-        };
-        HttpResponse::BadRequest().json(response)
-    }
+    with_db_connection(|client| async move {
+        match fetch_token_is_valid(&client, &params.token, &params.user_id).await {
+            Ok(true) => {
+                info!("Authentication successful");
+                let response = ApiResponse {
+                    status: String::from("success"),
+                    message: String::from("Authentication successful"),
+                };
+                HttpResponse::Ok().json(response)
+            }
+            Ok(false) => {
+                info!("Authentication failed");
+                let response = ApiResponse {
+                    status: String::from("error"),
+                    message: String::from("Authentication failed"),
+                };
+                HttpResponse::BadRequest().json(response)
+            }
+            Err(e) => {
+                error!("Error occurred in fetch_token_is_valid: {:?}", e);
+                HttpResponse::InternalServerError().json("Internal server error")
+            }
+        }
+    })
+    .await
 }
