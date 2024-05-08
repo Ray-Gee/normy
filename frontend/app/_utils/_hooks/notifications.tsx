@@ -15,7 +15,7 @@ export function useNotification() {
     error,
   }: {
     message?: string;
-    error: unknown;
+    error?: unknown;
   }) => {
     notifications.show({
       title: "エラー",
