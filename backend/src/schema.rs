@@ -1,10 +1,9 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    user_tokens (id) {
-        id -> Uuid,
-        user_id -> Uuid,
+    user_tokens (token) {
         token -> Varchar,
+        user_id -> Uuid,
         #[max_length = 50]
         token_type -> Varchar,
         created_at -> Timestamp,

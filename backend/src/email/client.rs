@@ -2,7 +2,6 @@ use crate::auth::token;
 use crate::config::constants;
 use crate::db;
 use crate::types::User;
-// use chrono::Local;
 use lettre::{transport::smtp::authentication::Credentials, Message, SmtpTransport, Transport};
 use log::{debug, error, info};
 use std::env;
@@ -49,13 +48,11 @@ pub async fn send_confirmation_email(client: &Client, user: &User) -> Result<(),
     // トークン生成
     let token = token::generate_confirmation_token();
     let token_type = "activation";
-    let expires_at = chrono::Utc::now() + chrono::Duration::days(1);
+    let expires_at = chrono::Utc::now().naive_utc() + chrono::Duration::days(1);
     let link = token::generate_confirmation_link(&user_id.to_string(), &token);
 
     // データベースにトークンを保存
-    if let Err(e) =
-        db::create_token(client, &user_id, &token, token_type, expires_at.naive_utc()).await
-    {
+    if let Err(e) = db::create_token(client, &user_id, &token, token_type, expires_at).await {
         error!("Failed to save token: {:?}", e);
         return Err("Failed to save token.".to_string());
     }

@@ -1,7 +1,6 @@
 CREATE TABLE user_tokens (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    token VARCHAR PRIMARY KEY NOT NULL,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token VARCHAR NOT NULL,
     token_type VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NOT NULL,
