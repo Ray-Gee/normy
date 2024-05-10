@@ -13,8 +13,8 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
   const { data, error, isLoading } = useListUsers({ backendName });
   console.log("data:", data);
   useEffect(() => {
-    if (data) {
-      setUsers([...data].reverse());
+    if (data?.status == 200) {
+      setUsers([...data.data].reverse());
     }
   }, [data]);
 

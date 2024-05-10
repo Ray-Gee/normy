@@ -1,4 +1,4 @@
-import { Method } from "axios";
+import { AxiosResponse, Method } from "axios";
 import api, { API_ENDPOINTS } from "@/_routes/api";
 import type { NewUser, User, ExistingUser } from "@/definitions";
 
@@ -6,11 +6,11 @@ interface withId {
   id: string;
 }
 
-async function apiRequest<T>(
+async function apiRequest(
   method: Method,
   url: string,
   data?: any
-): Promise<T> {
+): Promise<AxiosResponse<any, any>> {
   try {
     const config = {
       method: method,
@@ -21,19 +21,19 @@ async function apiRequest<T>(
     };
     const response = await api(config);
     console.log("response:", response);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error api request:", error);
     throw error;
   }
 }
 
-export const listUsers = async (): Promise<ExistingUser[]> => {
-  return await apiRequest<ExistingUser[]>("get", API_ENDPOINTS.USERS);
+export const listUsers = async (): Promise<AxiosResponse<any, any>> => {
+  return await apiRequest("get", API_ENDPOINTS.USERS);
 };
 
-export const getUser = async (id: string): Promise<ExistingUser> => {
-  return await apiRequest<ExistingUser>("get", `${API_ENDPOINTS.USERS}/${id}`);
+export const getUser = async (id: string): Promise<AxiosResponse<any, any>> => {
+  return await apiRequest("get", `${API_ENDPOINTS.USERS}/${id}`);
 };
 
 export async function fetchData<T>({
@@ -53,7 +53,8 @@ export async function fetchData<T>({
 }
 
 export const createUser = async (user: NewUser): Promise<ExistingUser> => {
-  return await apiRequest<ExistingUser>("post", API_ENDPOINTS.USERS, user);
+  const response = await apiRequest("post", API_ENDPOINTS.USERS, user);
+  return response.data;
 };
 
 export const createWrapper = async <T, U>({
@@ -100,11 +101,14 @@ export const updateData = async <T,>({
 }: {
   endpoint: string;
   data: T;
-}): Promise<T> => {
-  return await apiRequest<T>("put", endpoint, data);
+}): Promise<AxiosResponse<any, any>> => {
+  return await apiRequest("put", endpoint, data);
 };
 
-export const updateUser = async (id: string, userData: User): Promise<User> => {
+export const updateUser = async (
+  id: string,
+  userData: User
+): Promise<AxiosResponse<any, any>> => {
   return updateData<User>({
     endpoint: API_ENDPOINTS.USER(id),
     data: userData,

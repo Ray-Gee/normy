@@ -6,6 +6,7 @@ mod config;
 mod db;
 mod email;
 mod handlers;
+mod middleware;
 mod routes;
 mod types;
 mod utils;

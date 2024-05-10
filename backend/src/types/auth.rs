@@ -6,3 +6,9 @@ pub struct AuthConfirmParams {
     pub user_id: Uuid,
     pub token: String,
 }
+
+#[derive(Deserialize, Debug)]
+pub struct LoginParams {
+    pub email: String,
+    pub password: String,
+}

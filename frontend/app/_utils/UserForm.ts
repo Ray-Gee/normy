@@ -29,3 +29,16 @@ export const UserAuthForm = (initialValues: {
     },
   });
 };
+
+export const UserLoginForm = (initialValues: {
+  email: string;
+  password: string;
+}) => {
+  return useForm({
+    initialValues,
+    validate: {
+      email: validateEmail,
+      password: validatePassword,
+    },
+  });
+};

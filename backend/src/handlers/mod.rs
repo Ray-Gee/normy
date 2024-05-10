@@ -1,11 +1,12 @@
+use crate::auth::jwt;
 use crate::db::{
-    create_and_fetch_user, delete_token, delete_user, fetch_all_users, fetch_token_is_valid,
-    fetch_user_by_id, update_activated_at, update_user,
+    authenticate_user, create_and_fetch_user, delete_token, delete_user, fetch_all_users,
+    fetch_token_is_valid, fetch_user_by_id, update_activated_at, update_user,
 };
 use crate::email;
-use crate::types::{ApiResponse, AuthConfirmParams, User};
+use crate::types::{ApiResponse, AuthConfirmParams, LoginParams, TokenResponse, User};
 use actix_web::{web, HttpResponse, Responder};
-use deadpool_postgres::{Client, Pool};
+use deadpool_postgres::Pool;
 use log::{error, info};
 use serde_json::json;
 use uuid::Uuid;
@@ -133,7 +134,6 @@ pub async fn post_auth_confirm(
                     Ok(_) => {
                         update_activated_at(&client, &params.user_id).await.unwrap();
                         let response = ApiResponse {
-                            status: String::from("success"),
                             message: String::from("Authentication successful"),
                         };
                         HttpResponse::Ok().json(response)
@@ -147,7 +147,6 @@ pub async fn post_auth_confirm(
             Ok(false) => {
                 info!("Authentication failed");
                 let response = ApiResponse {
-                    status: String::from("error"),
                     message: String::from("Authentication failed"),
                 };
                 HttpResponse::BadRequest().json(response)
@@ -157,6 +156,47 @@ pub async fn post_auth_confirm(
                 HttpResponse::InternalServerError().json("Internal server error")
             }
         },
+        Err(e) => {
+            error!("Failed to get DB connection from pool: {:?}", e);
+            HttpResponse::InternalServerError().body("Failed to get DB connection")
+        }
+    }
+}
+
+pub async fn login_handler(
+    pool: web::Data<Pool>,
+    params: web::Json<LoginParams>,
+) -> impl Responder {
+    info!("login_handler内: {:?}", params);
+    match pool.get().await {
+        Ok(client) => {
+            match authenticate_user(&client, &params.email, &params.password).await {
+                Ok(Some(user)) => {
+                    info!("Login successful for user: {:?}", user);
+
+                    // JWTの生成
+                    let token = jwt::create_jwt(&user.id.expect("Expected Uuid").to_string());
+
+                    let base_response = ApiResponse {
+                        message: String::from("Login successful"),
+                    };
+                    let response = TokenResponse {
+                        base: base_response,
+                        token,
+                    };
+
+                    HttpResponse::Ok().json(response)
+                }
+                Ok(None) => {
+                    error!("Authentication failed for user: {}", params.email);
+                    HttpResponse::Unauthorized().body("Authentication failed")
+                }
+                Err(e) => {
+                    error!("Failed to authenticate user: {:?}", e);
+                    HttpResponse::InternalServerError().body("Internal Server Error")
+                }
+            }
+        }
         Err(e) => {
             error!("Failed to get DB connection from pool: {:?}", e);
             HttpResponse::InternalServerError().body("Failed to get DB connection")

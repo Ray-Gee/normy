@@ -1,4 +1,6 @@
-export const theme = {
+import { MantineThemeOverride } from "@mantine/core";
+
+export const theme: MantineThemeOverride = {
   focusRing: "auto",
   scale: 1,
   fontSmoothing: true,

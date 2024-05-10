@@ -1,12 +1,12 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import api, { API_ENDPOINTS } from "@/_routes/api";
-import type { NewUser, User, QueryProps } from "@/definitions";
+import type { LoginProps, User, QueryProps } from "@/definitions";
 
-async function apiRequest<T>(
+async function apiRequest(
   method: "get" | "post" | "put" | "delete",
   url: string,
   data: any
-): Promise<T> {
+): Promise<AxiosResponse<any, any>> {
   try {
     const config = {
       method: method,
@@ -15,7 +15,7 @@ async function apiRequest<T>(
     };
     console.log("config:", config);
     const response = await api(config);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error api request:", error);
     throw error;
@@ -27,14 +27,19 @@ export const authConfirm = async ({
   userId,
 }: QueryProps): Promise<any> => {
   console.log("API_ENDPOINTS.CONFIRM:", API_ENDPOINTS.CONFIRM);
-  return await apiRequest<any>("post", API_ENDPOINTS.CONFIRM, {
+  return await apiRequest("post", API_ENDPOINTS.CONFIRM, {
     token,
     userId,
   });
 };
 
-// async function verifyToken(token, userId) {
-// データベースやキャッシュからトークンを検索し、ユーザーIDと一致するか確認
-// ここに検証ロジックを実装
-//   return true; // 仮の実装
-// }
+export const verifyToken = async ({
+  email,
+  password,
+}: LoginProps): Promise<any> => {
+  console.log("API_ENDPOINTS.LOGIN:", API_ENDPOINTS.LOGIN);
+  return await apiRequest("post", API_ENDPOINTS.LOGIN, {
+    email,
+    password,
+  });
+};

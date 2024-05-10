@@ -80,3 +80,8 @@ export interface QueryProps {
   token: string;
   userId: string;
 }
+
+export interface LoginProps {
+  email: string;
+  password: string;
+}

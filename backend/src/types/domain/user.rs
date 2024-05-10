@@ -9,3 +9,10 @@ pub struct User {
     pub email: email::Email,
     pub password: Option<password::Password>,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct AuthenticatedUser {
+    pub id: Option<Uuid>,
+    pub email: email::Email,
+    pub password: Option<password::Password>,
+}

@@ -1,3 +1,5 @@
+use crate::types::AuthenticatedUser;
+use bcrypt::verify;
 use chrono::Utc;
 use log::{debug, error, info};
 use std::error::Error;
@@ -59,4 +61,28 @@ pub async fn create_token(
             Err(Box::new(e))
         }
     }
+}
+
+pub async fn authenticate_user(
+    client: &Client,
+    email: &str,
+    password: &str,
+) -> Result<Option<AuthenticatedUser>, Box<dyn std::error::Error>> {
+    let statement = client
+        .prepare("SELECT id, email, password FROM users WHERE email = $1")
+        .await?;
+    if let Some(row) = client.query_opt(&statement, &[&email]).await? {
+        let user = AuthenticatedUser {
+            id: row.get("id"),
+            email: row.get("email"),
+            password: row.get("password"),
+        };
+
+        if let Some(hashed_password) = user.password.clone() {
+            if verify(password, hashed_password.as_str())? {
+                return Ok(Some(user));
+            }
+        }
+    }
+    Ok(None)
 }

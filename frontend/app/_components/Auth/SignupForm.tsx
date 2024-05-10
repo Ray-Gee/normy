@@ -26,7 +26,7 @@ export default function SignupForm() {
   const { mutate, isPending } = useCreateSignupUser({
     onSuccess: () => {
       notifySuccess("アカウントが正常に作成されました。");
-      router.push("/login");
+      // router.push("/login");
     },
     onError: (error) => {
       notifyError({ error });

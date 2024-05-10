@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   USER: (id: string) => `${API_URL}/users/${id}`,
   PRODUCTS: `${API_URL}/products`,
   CONFIRM: `${API_URL}/confirm`,
+  LOGIN: `${API_URL}/login`,
 };
 
 const api = axios.create({

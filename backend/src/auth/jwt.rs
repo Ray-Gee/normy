@@ -1,8 +1,11 @@
-use jsonwebtoken::{encode, EncodingKey, Header};
-use serde::Serialize;
+use std::env;
 
-#[derive(Serialize)]
-struct Claims {
+use jsonwebtoken::{decode, errors::Error, DecodingKey, Validation};
+use jsonwebtoken::{encode, EncodingKey, Header};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
     sub: String,
     exp: usize,
 }
@@ -24,4 +27,13 @@ pub fn create_jwt(id: &str) -> String {
         &EncodingKey::from_secret("secret".as_ref()),
     )
     .unwrap()
+}
+
+pub fn validate_jwt(token: &str) -> Result<Claims, Error> {
+    decode::<Claims>(
+        token,
+        &DecodingKey::from_secret(env::var("SECRET_KEY").expect("Expected").as_ref()),
+        &Validation::default(),
+    )
+    .map(|data| data.claims)
 }

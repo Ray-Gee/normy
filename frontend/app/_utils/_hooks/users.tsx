@@ -8,6 +8,7 @@ import {
   deleteWrapper,
   createDataItem,
 } from "@/_services/userService";
+import { verifyToken } from "@/_services/authService";
 import type {
   NewUser,
   ExistingUser,
@@ -15,10 +16,12 @@ import type {
   UseUpdateUserProps,
   UseDeleteUserProps,
   ResultProps,
+  LoginProps,
 } from "@/definitions";
+import { AxiosResponse } from "axios";
 
 export const useListUsers = ({ backendName }: { backendName: String }) => {
-  return useQuery<ExistingUser[], Error>({
+  return useQuery<AxiosResponse<any, any>, Error>({
     queryKey: ["users", backendName],
     queryFn: () => listUsers(),
   });
@@ -139,6 +142,31 @@ export const useDeleteUser = ({
       onSuccess();
     },
     onError: (error: Error) => {
+      onError(error);
+    },
+  });
+};
+
+type UseVerifyTokenProps = {
+  onSuccess: (data: any) => void;
+  onError: (error: any) => void;
+};
+
+export const useVerifyToken = ({ onSuccess, onError }: UseVerifyTokenProps) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["token"],
+    mutationFn: async (values: LoginProps) => {
+      return verifyToken(values);
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["token"],
+      });
+      onSuccess(data);
+    },
+    onError: (error) => {
       onError(error);
     },
   });
