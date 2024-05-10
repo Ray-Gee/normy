@@ -1,16 +1,17 @@
-import { AxiosResponse, Method } from "axios";
+import axios, { AxiosResponse, Method } from "axios";
 import api, { API_ENDPOINTS } from "@/_routes/api";
 import type { NewUser, User, ExistingUser } from "@/definitions";
+import { ApiError } from "@/definitions";
 
 interface withId {
   id: string;
 }
 
-async function apiRequest(
+export async function apiRequest<T>(
   method: Method,
   url: string,
   data?: any
-): Promise<AxiosResponse<any, any>> {
+): Promise<T> {
   try {
     const config = {
       method: method,
@@ -19,20 +20,31 @@ async function apiRequest(
         ? { params: data }
         : { data }),
     };
-    const response = await api(config);
-    console.log("response:", response);
-    return response;
+    const response: any = await api(config);
+
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new ApiError(response.status, response.statusText, response.data);
+    }
   } catch (error) {
-    console.error("Error api request:", error);
+    if (axios.isAxiosError(error) && error.response) {
+      throw new ApiError(
+        error.response.status,
+        error.response.statusText,
+        error.response.data
+      );
+    }
+    console.error("Error in api request:", error);
     throw error;
   }
 }
 
-export const listUsers = async (): Promise<AxiosResponse<any, any>> => {
+export const listUsers = async (): Promise<ExistingUser[]> => {
   return await apiRequest("get", API_ENDPOINTS.USERS);
 };
 
-export const getUser = async (id: string): Promise<AxiosResponse<any, any>> => {
+export const getUser = async (id: string): Promise<ExistingUser> => {
   return await apiRequest("get", `${API_ENDPOINTS.USERS}/${id}`);
 };
 
@@ -53,8 +65,7 @@ export async function fetchData<T>({
 }
 
 export const createUser = async (user: NewUser): Promise<ExistingUser> => {
-  const response = await apiRequest("post", API_ENDPOINTS.USERS, user);
-  return response.data;
+  return apiRequest("post", API_ENDPOINTS.USERS, user);
 };
 
 export const createWrapper = async <T, U>({
@@ -101,14 +112,11 @@ export const updateData = async <T,>({
 }: {
   endpoint: string;
   data: T;
-}): Promise<AxiosResponse<any, any>> => {
+}): Promise<any> => {
   return await apiRequest("put", endpoint, data);
 };
 
-export const updateUser = async (
-  id: string,
-  userData: User
-): Promise<AxiosResponse<any, any>> => {
+export const updateUser = async (id: string, userData: User): Promise<any> => {
   return updateData<User>({
     endpoint: API_ENDPOINTS.USER(id),
     data: userData,

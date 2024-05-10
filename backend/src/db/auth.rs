@@ -69,7 +69,7 @@ pub async fn authenticate_user(
     password: &str,
 ) -> Result<Option<AuthenticatedUser>, Box<dyn std::error::Error>> {
     let statement = client
-        .prepare("SELECT id, email, password FROM users WHERE email = $1")
+        .prepare("SELECT id, email, password FROM users WHERE email = $1 AND activated_at is NOT NULL")
         .await?;
     if let Some(row) = client.query_opt(&statement, &[&email]).await? {
         let user = AuthenticatedUser {

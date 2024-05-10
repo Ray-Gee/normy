@@ -14,9 +14,6 @@ const CardComponent: React.FC<{ card: CardProps }> = ({ card }) => {
         style={{ textDecoration: "none" }}
         className="mb-2 hover:bg-gray-100 cursor-pointer"
       >
-        {/* <Text size="sm" color="dimmed">
-          {<T id="ID" />}:{card.id}
-        </Text> */}
         <Text size="lg">
           {<T id="Name" />}: {card.name}
         </Text>

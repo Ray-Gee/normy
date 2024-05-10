@@ -57,7 +57,6 @@ pub async fn list_users_handler(pool: web::Data<Pool>) -> impl Responder {
     info!("list_users 中身");
     match pool.get().await {
         Ok(client) => {
-            // DB操作を実行
             match fetch_all_users(&client).await {
                 Ok(users) => HttpResponse::Ok().json(users),
                 Err(e) => {
@@ -174,7 +173,6 @@ pub async fn login_handler(
                 Ok(Some(user)) => {
                     info!("Login successful for user: {:?}", user);
 
-                    // JWTの生成
                     let token = jwt::create_jwt(&user.id.expect("Expected Uuid").to_string());
 
                     let base_response = ApiResponse {

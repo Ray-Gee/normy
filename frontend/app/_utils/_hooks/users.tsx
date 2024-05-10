@@ -21,7 +21,7 @@ import type {
 import { AxiosResponse } from "axios";
 
 export const useListUsers = ({ backendName }: { backendName: String }) => {
-  return useQuery<AxiosResponse<any, any>, Error>({
+  return useQuery<ExistingUser[], Error>({
     queryKey: ["users", backendName],
     queryFn: () => listUsers(),
   });

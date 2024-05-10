@@ -85,3 +85,19 @@ export interface LoginProps {
   email: string;
   password: string;
 }
+
+export class ApiError extends Error {
+  public status: number;
+  public statusText: string;
+  public data: any;
+
+  constructor(status: number, statusText: string, data: any) {
+    super(`Error ${status}: ${statusText}`);
+    this.status = status;
+    this.statusText = statusText;
+    this.data = data;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ApiError);
+    }
+  }
+}

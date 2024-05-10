@@ -13,9 +13,11 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
   const { data, error, isLoading } = useListUsers({ backendName });
   console.log("data:", data);
   useEffect(() => {
-    if (data?.status == 200) {
-      setUsers([...data.data].reverse());
+    if (!data) {
+      console.error("Data is undefined");
+      return;
     }
+    setUsers([...data].reverse());
   }, [data]);
 
   if (isLoading) return <LoadingOverlay visible={true} />;
