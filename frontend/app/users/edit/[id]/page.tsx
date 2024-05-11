@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import type { ExistingUser } from "@/definitions";
-import { EditUserForm } from "@/_components/user/EditForm";
+import { Edit } from "@/_components/user/Edit";
 import { getUser, fetchData } from "@/_services/userService";
 
 export default function Page({ params }: { params: { id: string } }) {
@@ -29,7 +29,7 @@ export default function Page({ params }: { params: { id: string } }) {
           },
         ]}
       /> */}
-      {user && <EditUserForm user={user} />}
+      {user && <Edit user={user} />}
     </main>
   );
 }

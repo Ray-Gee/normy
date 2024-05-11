@@ -7,12 +7,11 @@ import {
 import { NavItem } from "@/definitions";
 
 export const navLinks: NavItem[] = [
-  { label: "Dashboard", icon: IconDashboard, link: "/dashboard" },
-
+  // { label: "Dashboard", icon: IconDashboard, link: "/dashboard" },
   {
     label: "Components",
     icon: IconComponents,
-    initiallyOpened: true,
+    initiallyOpened: false,
     links: [
       {
         label: "Table",
@@ -27,7 +26,7 @@ export const navLinks: NavItem[] = [
   {
     label: "Auth",
     icon: IconLock,
-    initiallyOpened: true,
+    initiallyOpened: false,
     links: [
       {
         label: "Login",
@@ -42,7 +41,7 @@ export const navLinks: NavItem[] = [
   {
     label: "Sample",
     icon: IconMoodSmile,
-    initiallyOpened: true,
+    initiallyOpened: false,
     links: [
       {
         label: "Landing",

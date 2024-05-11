@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import { useRouter } from "next/navigation";
 import type { UserProps } from "@/definitions";
@@ -15,6 +14,7 @@ import {
   TextInput,
   Title,
   LoadingOverlay,
+  Box,
 } from "@mantine/core";
 import { UserForm } from "@/_utils/UserForm";
 import { T } from "@/_intl/T";
@@ -25,12 +25,12 @@ import { decodeToken } from "@/_utils/utils";
 
 export const EditUserForm: React.FC<UserProps> = ({ user }) => {
   const router = useRouter();
-  const { setUser } = useUser();
-  const { notifySuccess, notifyError } = useNotification();
   const form = UserForm({
     name: user.name,
     email: user.email,
   });
+  const { setUser } = useUser();
+  const { notifySuccess, notifyError } = useNotification();
   const { mutate, isPending } = useUpdateUser({
     user,
     onSuccess: (values: any) => {
@@ -55,53 +55,27 @@ export const EditUserForm: React.FC<UserProps> = ({ user }) => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-      }}
-    >
-      <Container size={420}>
-        <Stack>
-          <Center>
-            <Title order={1}>
-              <T id="Users.edit" />
-            </Title>
-          </Center>
-          <Paper withBorder p="xl" radius="sm">
-            <form onSubmit={form.onSubmit(handleSubmit)}>
-              <Flex direction="column" gap="md">
-                <SimpleGrid cols={1}>
-                  <Alert color="red">
-                    <T id="Alert" />
-                  </Alert>
-                </SimpleGrid>
-                <SimpleGrid cols={1}>
-                  <TextInput
-                    {...form.getInputProps("name")}
-                    required
-                    label={<T id="Username" />}
-                  />
-                  <TextInput
-                    {...form.getInputProps("email")}
-                    required
-                    label={<T id="Email" />}
-                    placeholder="sample@sample.com"
-                  />
-                </SimpleGrid>
-                <Flex justify="flex-end">
-                  <Button type="submit">
-                    <T id="Edit" />
-                  </Button>
-                </Flex>
-                <Divider labelPosition="center"></Divider>
-              </Flex>
-            </form>
-          </Paper>
-        </Stack>
-      </Container>
-    </div>
+    <form onSubmit={form.onSubmit(handleSubmit)}>
+      <Flex direction="column" gap="md">
+        <SimpleGrid cols={1}>
+          <TextInput
+            {...form.getInputProps("name")}
+            required
+            label={<T id="Username" />}
+          />
+          <TextInput
+            {...form.getInputProps("email")}
+            required
+            label={<T id="Email" />}
+            placeholder="sample@sample.com"
+          />
+        </SimpleGrid>
+        <Flex justify="flex-end">
+          <Button type="submit">
+            <T id="Edit" />
+          </Button>
+        </Flex>
+      </Flex>
+    </form>
   );
 };
