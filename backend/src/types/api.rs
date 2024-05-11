@@ -6,8 +6,8 @@ pub struct ApiResponse {
 }
 
 #[derive(Serialize)]
-pub struct TokenResponse {
+pub struct JwtResponse {
     #[serde(flatten)]
     pub base: ApiResponse,
-    pub token: String,
+    pub jwt: String,
 }

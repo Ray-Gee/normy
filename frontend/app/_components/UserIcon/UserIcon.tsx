@@ -13,7 +13,7 @@ interface UserIconProps extends UnstyledButtonProps {
   email: string;
 }
 
-export function UserIcon({ image, name, email, ...others }: UserIconProps) {
+export function UserIcon({ image, name, email }: UserIconProps) {
   return (
     <Menu.Target>
       <UnstyledButton>
@@ -21,7 +21,7 @@ export function UserIcon({ image, name, email, ...others }: UserIconProps) {
           <Avatar src={image} radius="xl" />
           <div>
             <Text size="sm">{name}</Text>
-            <Text size="xs" color="dimmed">
+            <Text size="xs" c="dimmed">
               {email}
             </Text>
           </div>

@@ -4,7 +4,7 @@ use crate::db::{
     fetch_token_is_valid, fetch_user_by_id, update_activated_at, update_user,
 };
 use crate::email;
-use crate::types::{ApiResponse, AuthConfirmParams, LoginParams, TokenResponse, User};
+use crate::types::{ApiResponse, AuthConfirmParams, JwtResponse, LoginParams, User};
 use actix_web::{web, HttpResponse, Responder};
 use deadpool_postgres::Pool;
 use log::{error, info};
@@ -56,15 +56,13 @@ pub async fn get_user_handler(pool: web::Data<Pool>, user_id: web::Path<Uuid>) -
 pub async fn list_users_handler(pool: web::Data<Pool>) -> impl Responder {
     info!("list_users 中身");
     match pool.get().await {
-        Ok(client) => {
-            match fetch_all_users(&client).await {
-                Ok(users) => HttpResponse::Ok().json(users),
-                Err(e) => {
-                    error!("Failed in list_users_handler: {:?}", e);
-                    HttpResponse::InternalServerError().body("Internal error")
-                }
+        Ok(client) => match fetch_all_users(&client).await {
+            Ok(users) => HttpResponse::Ok().json(users),
+            Err(e) => {
+                error!("Failed in list_users_handler: {:?}", e);
+                HttpResponse::InternalServerError().body("Internal error")
             }
-        }
+        },
         Err(e) => {
             error!("Failed to get DB connection from pool: {:?}", e);
             HttpResponse::InternalServerError().body("Failed to get DB connection")
@@ -79,7 +77,25 @@ pub async fn put_user_handler(
 ) -> impl Responder {
     match pool.get().await {
         Ok(client) => match update_user(&client, &user.into_inner(), *user_id).await {
-            Ok(_) => HttpResponse::Ok().body("User updated"),
+            Ok(_) => {
+                match fetch_user_by_id(&client, *user_id).await {
+                    Ok(user) => {
+                        let jwt = jwt::create_jwt(&user);
+                        let base_response = ApiResponse {
+                            message: String::from("Update successful"),
+                        };
+                        let response = JwtResponse {
+                            base: base_response,
+                            jwt,
+                        };
+                        HttpResponse::Ok().json(response)
+                    },
+                    Err(e) => {
+                        error!("Failed in fetch_user_by_id: {:?}", e);
+                        HttpResponse::InternalServerError().body("Internal error")
+                    }
+                }
+            },
             Err(e) => {
                 error!("Failed in put_user_handler: {:?}", e);
                 HttpResponse::InternalServerError().body("Internal error")
@@ -168,33 +184,31 @@ pub async fn login_handler(
 ) -> impl Responder {
     info!("login_handler内: {:?}", params);
     match pool.get().await {
-        Ok(client) => {
-            match authenticate_user(&client, &params.email, &params.password).await {
-                Ok(Some(user)) => {
-                    info!("Login successful for user: {:?}", user);
+        Ok(client) => match authenticate_user(&client, &params.email, &params.password).await {
+            Ok(Some(user)) => {
+                info!("Login successful for user: {:?}", user);
 
-                    let token = jwt::create_jwt(&user.id.expect("Expected Uuid").to_string());
+                let jwt = jwt::create_jwt(&user);
 
-                    let base_response = ApiResponse {
-                        message: String::from("Login successful"),
-                    };
-                    let response = TokenResponse {
-                        base: base_response,
-                        token,
-                    };
+                let base_response = ApiResponse {
+                    message: String::from("Login successful"),
+                };
+                let response = JwtResponse {
+                    base: base_response,
+                    jwt,
+                };
 
-                    HttpResponse::Ok().json(response)
-                }
-                Ok(None) => {
-                    error!("Authentication failed for user: {}", params.email);
-                    HttpResponse::Unauthorized().body("Authentication failed")
-                }
-                Err(e) => {
-                    error!("Failed to authenticate user: {:?}", e);
-                    HttpResponse::InternalServerError().body("Internal Server Error")
-                }
+                HttpResponse::Ok().json(response)
             }
-        }
+            Ok(None) => {
+                error!("Authentication failed for user: {}", params.email);
+                HttpResponse::Unauthorized().body("Authentication failed")
+            }
+            Err(e) => {
+                error!("Failed to authenticate user: {:?}", e);
+                HttpResponse::InternalServerError().body("Internal Server Error")
+            }
+        },
         Err(e) => {
             error!("Failed to get DB connection from pool: {:?}", e);
             HttpResponse::InternalServerError().body("Failed to get DB connection")

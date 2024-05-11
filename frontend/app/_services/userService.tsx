@@ -1,43 +1,9 @@
-import axios, { AxiosResponse, Method } from "axios";
-import api, { API_ENDPOINTS } from "@/_routes/api";
+import { API_ENDPOINTS } from "@/_routes/api";
 import type { NewUser, User, ExistingUser } from "@/definitions";
-import { ApiError } from "@/definitions";
+import { apiRequest } from "@/_utils/utils";
 
 interface withId {
   id: string;
-}
-
-export async function apiRequest<T>(
-  method: Method,
-  url: string,
-  data?: any
-): Promise<T> {
-  try {
-    const config = {
-      method: method,
-      url: url,
-      ...(method === "GET" || method === "DELETE"
-        ? { params: data }
-        : { data }),
-    };
-    const response: any = await api(config);
-
-    if (response.status === 200) {
-      return response.data;
-    } else {
-      throw new ApiError(response.status, response.statusText, response.data);
-    }
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      throw new ApiError(
-        error.response.status,
-        error.response.statusText,
-        error.response.data
-      );
-    }
-    console.error("Error in api request:", error);
-    throw error;
-  }
 }
 
 export const listUsers = async (): Promise<ExistingUser[]> => {

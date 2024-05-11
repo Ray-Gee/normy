@@ -20,9 +20,12 @@ import { UserForm } from "@/_utils/UserForm";
 import { T } from "@/_intl/T";
 import { useNotification } from "@/_utils/_hooks/notifications";
 import { useUpdateUser } from "@/_utils/_hooks/users";
+import { useUser } from "@/UserContext";
+import { decodeToken } from "@/_utils/utils";
 
 export const EditUserForm: React.FC<UserProps> = ({ user }) => {
   const router = useRouter();
+  const { setUser } = useUser();
   const { notifySuccess, notifyError } = useNotification();
   const form = UserForm({
     name: user.name,
@@ -30,7 +33,11 @@ export const EditUserForm: React.FC<UserProps> = ({ user }) => {
   });
   const { mutate, isPending } = useUpdateUser({
     user,
-    onSuccess: () => {
+    onSuccess: (values: any) => {
+      console.log("values:", values);
+      localStorage.setItem("jwt", values.jwt);
+      const decodedUser = decodeToken(values.jwt);
+      setUser(decodedUser);
       notifySuccess("正常に更新されました。");
       router.push("/");
     },

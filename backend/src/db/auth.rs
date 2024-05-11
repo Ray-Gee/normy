@@ -1,4 +1,4 @@
-use crate::types::AuthenticatedUser;
+use crate::types::User;
 use bcrypt::verify;
 use chrono::Utc;
 use log::{debug, error, info};
@@ -67,13 +67,14 @@ pub async fn authenticate_user(
     client: &Client,
     email: &str,
     password: &str,
-) -> Result<Option<AuthenticatedUser>, Box<dyn std::error::Error>> {
+) -> Result<Option<User>, Box<dyn std::error::Error>> {
     let statement = client
-        .prepare("SELECT id, email, password FROM users WHERE email = $1 AND activated_at is NOT NULL")
+        .prepare("SELECT id, name, email, password FROM users WHERE email = $1 AND activated_at is NOT NULL")
         .await?;
     if let Some(row) = client.query_opt(&statement, &[&email]).await? {
-        let user = AuthenticatedUser {
+        let user = User {
             id: row.get("id"),
+            name: row.get("name"),
             email: row.get("email"),
             password: row.get("password"),
         };

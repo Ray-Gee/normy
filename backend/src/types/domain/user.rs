@@ -10,9 +10,10 @@ pub struct User {
     pub password: Option<password::Password>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AuthenticatedUser {
-    pub id: Option<Uuid>,
-    pub email: email::Email,
-    pub password: Option<password::Password>,
-}
+// #[derive(Serialize, Deserialize, Debug)]
+// pub struct AuthenticatedUser {
+//     pub id: Option<Uuid>,
+//     pub name: String,
+//     pub email: email::Email,
+//     pub password: Option<password::Password>,
+// }

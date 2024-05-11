@@ -83,11 +83,7 @@ export const useCreateSignupUser = ({ onSuccess, onError }: ResultProps) => {
   });
 };
 
-export const useUpdateUser = ({
-  user,
-  onError,
-  onSuccess,
-}: UseUpdateUserProps) => {
+export const useUpdateUser = ({ user, onError, onSuccess }: any) => {
   const queryClient = useQueryClient();
 
   const mutationFn = async (values: { name: string; email: string }) => {
@@ -100,11 +96,11 @@ export const useUpdateUser = ({
   return useMutation({
     mutationKey: ["updateUser"],
     mutationFn,
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
       });
-      onSuccess();
+      onSuccess(data);
     },
     onError: (error: Error) => {
       onError(error);

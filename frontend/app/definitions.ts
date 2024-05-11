@@ -86,6 +86,13 @@ export interface LoginProps {
   password: string;
 }
 
+export interface JwtProps {
+  email: string;
+  name: string;
+  exp: number;
+  sub: string;
+}
+
 export class ApiError extends Error {
   public status: number;
   public statusText: string;

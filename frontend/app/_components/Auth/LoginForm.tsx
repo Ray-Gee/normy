@@ -28,16 +28,13 @@ export default function LoginForm() {
 
   const { mutate, isPending } = useVerifyToken({
     onSuccess: (data: any) => {
-      console.debug("data:", data);
+      console.log("ログイン後data:", data);
       notifySuccess("ログインに成功しました。");
       form.reset();
-      if (data.status === 200) {
-        const { token } = data.data;
-        localStorage.setItem("token", token);
-        router.push("/");
-      } else {
-        console.error("Failed to sign in");
-      }
+      const jwt = data.jwt;
+      console.log("jwt:", jwt);
+      localStorage.setItem("jwt", jwt);
+      router.push("/");
     },
     onError: (error: any) => {
       console.error("An error occurred during sign in:", error);

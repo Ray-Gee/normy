@@ -5,6 +5,7 @@ use std::error::Error;
 use std::fmt;
 use tokio_postgres::types::private::BytesMut;
 
+#[derive(Clone)] 
 pub struct Email(String);
 
 impl Email {

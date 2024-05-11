@@ -2,7 +2,6 @@ use postgres_types::to_sql_checked;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::error::Error;
 use std::fmt;
-use std::str::FromStr;
 use tokio_postgres::types::{private::BytesMut, FromSql, IsNull, ToSql, Type};
 
 #[derive(Debug, Clone)]

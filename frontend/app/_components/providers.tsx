@@ -3,6 +3,7 @@ import { MantineProvider } from "@mantine/core";
 import { LangProvider } from "@/_intl/intlContext";
 import { theme } from "@/theme";
 import { ClientProviders } from "@/_components/ClientProviders";
+import { UserProvider } from "@/UserContext";
 
 export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -10,7 +11,9 @@ export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({
   return (
     <MantineProvider theme={theme}>
       <ClientProviders>
-        <LangProvider>{children}</LangProvider>
+        <UserProvider>
+          <LangProvider>{children}</LangProvider>
+        </UserProvider>
       </ClientProviders>
     </MantineProvider>
   );

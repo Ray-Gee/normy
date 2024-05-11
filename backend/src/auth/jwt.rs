@@ -3,21 +3,29 @@ use std::env;
 use jsonwebtoken::{decode, errors::Error, DecodingKey, Validation};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+use crate::types::User;
+use crate::types::domain::email::Email;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    sub: String,
+    sub: Uuid,
+    name: String,
+    email: Email,
     exp: usize,
 }
 
-pub fn create_jwt(id: &str) -> String {
+pub fn create_jwt(user: &User) -> String {
     let expiration = chrono::Utc::now()
         .checked_add_signed(chrono::Duration::days(90))
         .expect("valid timestamp")
         .timestamp();
 
     let claims = Claims {
-        sub: id.to_owned(),
+        sub: user.id.expect("Expected Uuid"),
+        name: user.name.clone(),
+        email: user.email.clone(),
         exp: expiration as usize,
     };
     let header = Header::default();

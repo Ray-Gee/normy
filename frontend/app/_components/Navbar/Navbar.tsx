@@ -8,10 +8,14 @@ import {
   Avatar,
   Text,
 } from "@mantine/core";
+import { useRouter } from "next/navigation";
 import { UserIcon } from "@/_components/UserIcon/UserIcon";
-import { NavItem } from "@/definitions";
+import { decodeToken } from "@/_utils/utils";
+import { JwtProps, NavItem } from "@/definitions";
 import classes from "./Navbar.module.css";
 import { NavLinksGroup } from "./NavLinksGroup";
+import { useEffect, useState } from "react";
+import { useUser } from "@/UserContext";
 
 interface Props {
   data: NavItem[];
@@ -19,6 +23,9 @@ interface Props {
 }
 
 export function Navbar({ data }: Props) {
+  const { user } = useUser();
+  const router = useRouter();
+
   const links = data.map((item) => (
     <NavLinksGroup key={item.label} {...item} />
   ));
@@ -26,7 +33,7 @@ export function Navbar({ data }: Props) {
   const handleLogout = () => {
     console.log("Logged out");
     localStorage.removeItem("token");
-    window.location.href = "/login";
+    router.push("/login");
   };
 
   return (
@@ -50,11 +57,13 @@ export function Navbar({ data }: Props) {
         }}
       >
         <Menu position="top-start" withArrow withinPortal>
-          <UserIcon
-            image="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=255&q=80"
-            name="Ryuichi"
-            email="hsatlefp@gmail.com"
-          />
+          {user && (
+            <UserIcon
+              image="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=255&q=80"
+              name={user.name}
+              email={user.email}
+            />
+          )}
           <Menu.Dropdown>
             <Menu.Item>Profile</Menu.Item>
             <Menu.Item>Settings</Menu.Item>

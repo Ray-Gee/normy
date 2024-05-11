@@ -9,8 +9,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const jwt = localStorage.getItem("jwt");
+    if (!jwt) {
       router.push("/login");
     }
   }, [router]);
